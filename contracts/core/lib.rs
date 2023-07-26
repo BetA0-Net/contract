@@ -492,7 +492,7 @@ pub mod bet_a0 {
         /// Set new psp22 address
         #[ink(message)]
         #[openbrush::modifiers(only_owner)]
-        pub fn set_psp22(&mut self, bet_token_address: AccountId) -> Result<(), Error> {
+        pub fn set_bet_token_address(&mut self, bet_token_address: AccountId) -> Result<(), Error> {
             self.manager.bet_token_address = bet_token_address;
             Ok(())
         }
