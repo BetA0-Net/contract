@@ -2,8 +2,8 @@
 
 #[openbrush::implementation(PSP22, PSP22Mintable, Ownable, Pausable)]
 #[openbrush::contract]
-pub mod bet_a0ref {
-    use bet_a0::traits::core_token::*;
+pub mod bet_a0 {
+    use bet_a0::traits::core::*;
     use ink::storage::Mapping;
     use openbrush::{
         contracts::{
@@ -54,7 +54,7 @@ pub mod bet_a0ref {
         over_rates: Vec<u32>,
         under_rates: Vec<u32>,
         max_bet_ratio: u32,
-        psp22: AccountId,
+        bet_token_address: AccountId,
         token_ratio: u32,
         bets: Mapping<AccountId, BetInformation>,
         admin_account: AccountId,
@@ -67,7 +67,7 @@ pub mod bet_a0ref {
                 over_rates: Default::default(),
                 under_rates: Default::default(),
                 max_bet_ratio: Default::default(),
-                psp22: [0u8; 32].into(),
+                bet_token_address: [0u8; 32].into(),
                 token_ratio: Default::default(),
                 bets: Default::default(),
                 admin_account: [0u8; 32].into(),
@@ -78,7 +78,7 @@ pub mod bet_a0ref {
 
     #[ink(storage)]
     #[derive(Default, Storage)]
-    pub struct CoreTokenContract {
+    pub struct CoreContract {
         #[storage_field]
         psp22: psp22::Data,
         #[storage_field]
@@ -93,7 +93,7 @@ pub mod bet_a0ref {
         max_under_number: u32,
     }
 
-    impl CoreToken for CoreTokenContract {
+    impl Core for CoreContract {
         #[modifiers(only_owner)]
         #[ink(message)]
         fn mint(&mut self, account: AccountId, amount: Balance) -> Result<(), PSP22Error> {
@@ -128,11 +128,11 @@ pub mod bet_a0ref {
         bet_amount: Balance,
     }
 
-    impl CoreTokenContract {
+    impl CoreContract {
         #[ink(constructor)]
         pub fn new(
             max_bet_ratio: u32,
-            psp22: AccountId,
+            bet_token_address: AccountId,
             token_ratio: u32,
             min_over_number: u32,
             max_over_number: u32,
@@ -146,7 +146,7 @@ pub mod bet_a0ref {
             instance
                 .initialize(
                     max_bet_ratio,
-                    psp22,
+                    bet_token_address,
                     token_ratio,
                     min_over_number,
                     max_over_number,
@@ -185,7 +185,7 @@ pub mod bet_a0ref {
         pub fn initialize(
             &mut self,
             max_bet_ratio: u32,
-            psp22: AccountId,
+            bet_token_address: AccountId,
             token_ratio: u32,
             min_over_number: u32,
             max_over_number: u32,
@@ -194,7 +194,7 @@ pub mod bet_a0ref {
             admin_account: AccountId,
         ) -> Result<(), Error> {
             // Make sure the initial data can only be init once
-            if self.manager.psp22 != [0u8; 32].into() {
+            if self.manager.bet_token_address != [0u8; 32].into() {
                 return Err(Error::Custom(String::from("Contract Already Init")));
             }
             self.manager.over_rates = [
@@ -222,7 +222,7 @@ pub mod bet_a0ref {
             ]
             .to_vec();
             self.manager.max_bet_ratio = max_bet_ratio;
-            self.manager.psp22 = psp22;
+            self.manager.bet_token_address = bet_token_address;
             self.manager.token_ratio = token_ratio;
             self.min_over_number = min_over_number;
             self.max_over_number = max_over_number;
@@ -249,15 +249,18 @@ pub mod bet_a0ref {
                 .unwrap();
 
             let contract_balance =
-                CoreTokenRef::balance_of(&self.manager.psp22, Self::env().account_id());
+                PSP22Ref::balance_of(&self.manager.bet_token_address, Self::env().account_id());
             if contract_balance >= to_sent {
-                assert!(
-                    PSP22Ref::transfer(&self.manager.psp22, player, to_sent, Vec::<u8>::new())
-                        .is_ok()
-                );
+                assert!(PSP22Ref::transfer(
+                    &self.manager.bet_token_address,
+                    player,
+                    to_sent,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
             } else if contract_balance > 0 {
                 assert!(PSP22Ref::transfer(
-                    &self.manager.psp22,
+                    &self.manager.bet_token_address,
                     player,
                     contract_balance,
                     Vec::<u8>::new()
@@ -441,11 +444,13 @@ pub mod bet_a0ref {
                 return Err(Error::Custom(String::from("P::Contract is paused")));
             }
 
-            if value > PSP22Ref::balance_of(&self.manager.psp22, Self::env().account_id()) {
+            if value
+                > PSP22Ref::balance_of(&self.manager.bet_token_address, Self::env().account_id())
+            {
                 return Err(Error::Custom(String::from("O::Not Enough Balance")));
             }
             assert!(PSP22Ref::transfer(
-                &self.manager.psp22,
+                &self.manager.bet_token_address,
                 self.env().caller(),
                 value,
                 Vec::<u8>::new()
@@ -487,8 +492,8 @@ pub mod bet_a0ref {
         /// Set new psp22 address
         #[ink(message)]
         #[openbrush::modifiers(only_owner)]
-        pub fn set_psp22(&mut self, psp22: AccountId) -> Result<(), Error> {
-            self.manager.psp22 = psp22;
+        pub fn set_psp22(&mut self, bet_token_address: AccountId) -> Result<(), Error> {
+            self.manager.bet_token_address = bet_token_address;
             Ok(())
         }
 
@@ -599,7 +604,7 @@ pub mod bet_a0ref {
         /// get contract token balance
         #[ink(message)]
         pub fn get_token_balance(&self) -> Balance {
-            PSP22Ref::balance_of(&self.manager.psp22, Self::env().account_id())
+            PSP22Ref::balance_of(&self.manager.bet_token_address, Self::env().account_id())
         }
 
         /// Get token ratio
@@ -610,8 +615,8 @@ pub mod bet_a0ref {
 
         /// Get psp22 address
         #[ink(message)]
-        pub fn psp22(&self) -> AccountId {
-            self.manager.psp22
+        pub fn bet_token_address(&self) -> AccountId {
+            self.manager.bet_token_address
         }
 
         /// Get Over Rates

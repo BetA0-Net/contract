@@ -11,10 +11,10 @@ use openbrush::{
 };
 
 #[openbrush::wrapper]
-pub type CoreTokenRef = dyn PSP22 + PSP22Mintable + Ownable + Pausable;
+pub type CoreRef = dyn PSP22 + PSP22Mintable + Ownable + Pausable;
 
 #[openbrush::trait_definition]
-pub trait CoreToken: PSP22 + PSP22Mintable + Ownable + Pausable {
+pub trait Core: PSP22 + PSP22Mintable + Ownable + Pausable {
     #[ink(message)]
     fn mint(&mut self, account: AccountId, amount: Balance) -> Result<(), PSP22Error>;
 }

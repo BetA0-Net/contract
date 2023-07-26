@@ -2,7 +2,7 @@
 
 #[openbrush::implementation(PSP22, PSP22Metadata, PSP22Mintable, PSP22Burnable, Ownable, Pausable)]
 #[openbrush::contract]
-pub mod token {
+pub mod bet_token {
     use bet_a0::traits::bet_token::*;
     use openbrush::{
         contracts::{

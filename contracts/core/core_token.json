@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x9f2a6ced74ce641bd38bd8686955e7d1629f8a177b1025846a97136f8b418de0",
+    "hash": "0xdfc33d927b39459be3503a5e72ecdfbe0e37ba016bb7272080571c5b3ac59648",
     "language": "ink! 4.2.1",
     "compiler": "rustc 1.70.0-nightly",
     "build_info": {
@@ -34,7 +34,7 @@
             }
           },
           {
-            "label": "psp22",
+            "label": "bet_token_address",
             "type": {
               "displayName": [
                 "AccountId"
@@ -162,7 +162,7 @@
               "displayName": [
                 "Option"
               ],
-              "type": 30
+              "type": 33
             }
           },
           {
@@ -234,7 +234,7 @@
               "displayName": [
                 "Option"
               ],
-              "type": 30
+              "type": 33
             }
           },
           {
@@ -295,7 +295,7 @@
               "displayName": [
                 "Option"
               ],
-              "type": 30
+              "type": 33
             }
           },
           {
@@ -374,7 +374,7 @@
             }
           },
           {
-            "label": "psp22",
+            "label": "bet_token_address",
             "type": {
               "displayName": [
                 "AccountId"
@@ -686,7 +686,7 @@
       {
         "args": [
           {
-            "label": "psp22",
+            "label": "bet_token_address",
             "type": {
               "displayName": [
                 "AccountId"
@@ -1095,7 +1095,7 @@
         "docs": [
           " Get psp22 address"
         ],
-        "label": "psp22",
+        "label": "bet_token_address",
         "mutates": false,
         "payable": false,
         "returnType": {
@@ -1105,7 +1105,7 @@
           ],
           "type": 18
         },
-        "selector": "0xb2646034"
+        "selector": "0x9846dd6f"
       },
       {
         "args": [],
@@ -1183,7 +1183,7 @@
             "label": "account",
             "type": {
               "displayName": [
-                "coretoken_external",
+                "core_external",
                 "MintInput1"
               ],
               "type": 1
@@ -1193,7 +1193,7 @@
             "label": "amount",
             "type": {
               "displayName": [
-                "coretoken_external",
+                "core_external",
                 "MintInput2"
               ],
               "type": 0
@@ -1202,7 +1202,7 @@
         ],
         "default": false,
         "docs": [],
-        "label": "CoreToken::mint",
+        "label": "Core::mint",
         "mutates": true,
         "payable": false,
         "returnType": {
@@ -1212,7 +1212,7 @@
           ],
           "type": 25
         },
-        "selector": "0xfb6b2527"
+        "selector": "0xebded772"
       },
       {
         "args": [
@@ -1268,17 +1268,17 @@
             "type": {
               "displayName": [
                 "psp22_external",
-                "DecreaseAllowanceInput1"
+                "ApproveInput1"
               ],
               "type": 1
             }
           },
           {
-            "label": "delta_value",
+            "label": "value",
             "type": {
               "displayName": [
                 "psp22_external",
-                "DecreaseAllowanceInput2"
+                "ApproveInput2"
               ],
               "type": 0
             }
@@ -1286,7 +1286,7 @@
         ],
         "default": false,
         "docs": [],
-        "label": "PSP22::decrease_allowance",
+        "label": "PSP22::approve",
         "mutates": true,
         "payable": false,
         "returnType": {
@@ -1296,7 +1296,87 @@
           ],
           "type": 25
         },
-        "selector": "0xfecb57d5"
+        "selector": "0xb20f1bbd"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "PSP22::total_supply",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 23
+        },
+        "selector": "0x162df8c2"
+      },
+      {
+        "args": [
+          {
+            "label": "owner",
+            "type": {
+              "displayName": [
+                "psp22_external",
+                "BalanceOfInput1"
+              ],
+              "type": 1
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "PSP22::balance_of",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 23
+        },
+        "selector": "0x6568382f"
+      },
+      {
+        "args": [
+          {
+            "label": "owner",
+            "type": {
+              "displayName": [
+                "psp22_external",
+                "AllowanceInput1"
+              ],
+              "type": 1
+            }
+          },
+          {
+            "label": "spender",
+            "type": {
+              "displayName": [
+                "psp22_external",
+                "AllowanceInput2"
+              ],
+              "type": 1
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "PSP22::allowance",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 23
+        },
+        "selector": "0x4d47d921"
       },
       {
         "args": [
@@ -1395,101 +1475,21 @@
       {
         "args": [
           {
-            "label": "owner",
+            "label": "spender",
             "type": {
               "displayName": [
                 "psp22_external",
-                "AllowanceInput1"
+                "DecreaseAllowanceInput1"
               ],
               "type": 1
             }
           },
           {
-            "label": "spender",
+            "label": "delta_value",
             "type": {
               "displayName": [
                 "psp22_external",
-                "AllowanceInput2"
-              ],
-              "type": 1
-            }
-          }
-        ],
-        "default": false,
-        "docs": [],
-        "label": "PSP22::allowance",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 23
-        },
-        "selector": "0x4d47d921"
-      },
-      {
-        "args": [],
-        "default": false,
-        "docs": [],
-        "label": "PSP22::total_supply",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 23
-        },
-        "selector": "0x162df8c2"
-      },
-      {
-        "args": [
-          {
-            "label": "owner",
-            "type": {
-              "displayName": [
-                "psp22_external",
-                "BalanceOfInput1"
-              ],
-              "type": 1
-            }
-          }
-        ],
-        "default": false,
-        "docs": [],
-        "label": "PSP22::balance_of",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 23
-        },
-        "selector": "0x6568382f"
-      },
-      {
-        "args": [
-          {
-            "label": "spender",
-            "type": {
-              "displayName": [
-                "psp22_external",
-                "ApproveInput1"
-              ],
-              "type": 1
-            }
-          },
-          {
-            "label": "value",
-            "type": {
-              "displayName": [
-                "psp22_external",
-                "ApproveInput2"
+                "DecreaseAllowanceInput2"
               ],
               "type": 0
             }
@@ -1497,7 +1497,7 @@
         ],
         "default": false,
         "docs": [],
-        "label": "PSP22::approve",
+        "label": "PSP22::decrease_allowance",
         "mutates": true,
         "payable": false,
         "returnType": {
@@ -1507,7 +1507,7 @@
           ],
           "type": 25
         },
-        "selector": "0xb20f1bbd"
+        "selector": "0xfecb57d5"
       },
       {
         "args": [
@@ -1550,22 +1550,6 @@
         "args": [],
         "default": false,
         "docs": [],
-        "label": "Ownable::owner",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 29
-        },
-        "selector": "0x4fa43c8c"
-      },
-      {
-        "args": [],
-        "default": false,
-        "docs": [],
         "label": "Ownable::renounce_ownership",
         "mutates": true,
         "payable": false,
@@ -1574,9 +1558,25 @@
             "ink",
             "MessageResult"
           ],
-          "type": 31
+          "type": 29
         },
         "selector": "0x5e228753"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "Ownable::owner",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 32
+        },
+        "selector": "0x4fa43c8c"
       },
       {
         "args": [
@@ -1601,7 +1601,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 31
+          "type": 29
         },
         "selector": "0x11f43efd"
       },
@@ -1786,7 +1786,7 @@
                           "ty": 1
                         }
                       },
-                      "name": "psp22"
+                      "name": "bet_token_address"
                     },
                     {
                       "layout": {
@@ -1806,7 +1806,7 @@
                                 {
                                   "layout": {
                                     "leaf": {
-                                      "key": "0xcf15f5ab",
+                                      "key": "0x0d634690",
                                       "ty": 3
                                     }
                                   },
@@ -1815,7 +1815,7 @@
                                 {
                                   "layout": {
                                     "leaf": {
-                                      "key": "0xcf15f5ab",
+                                      "key": "0x0d634690",
                                       "ty": 6
                                     }
                                   },
@@ -1824,7 +1824,7 @@
                                 {
                                   "layout": {
                                     "leaf": {
-                                      "key": "0xcf15f5ab",
+                                      "key": "0x0d634690",
                                       "ty": 0
                                     }
                                   },
@@ -1834,7 +1834,7 @@
                               "name": "BetInformation"
                             }
                           },
-                          "root_key": "0xcf15f5ab"
+                          "root_key": "0x0d634690"
                         }
                       },
                       "name": "bets"
@@ -1920,7 +1920,7 @@
               "name": "max_under_number"
             }
           ],
-          "name": "CoreTokenContract"
+          "name": "CoreContract"
         }
       },
       "root_key": "0x00000000"
@@ -2284,7 +2284,7 @@
         },
         "path": [
           "core_token",
-          "bet_a0ref",
+          "bet_a0",
           "Error"
         ]
       }
@@ -2482,7 +2482,7 @@
         },
         "path": [
           "core_token",
-          "bet_a0ref",
+          "bet_a0",
           "BetInformation"
         ]
       }
@@ -2810,6 +2810,116 @@
           "variant": {
             "variants": [
               {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 31
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 7
+          },
+          {
+            "name": "E",
+            "type": 31
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 31,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "CallerIsNotOwner"
+              },
+              {
+                "index": 1,
+                "name": "NewOwnerIsZero"
+              }
+            ]
+          }
+        },
+        "path": [
+          "openbrush_contracts",
+          "traits",
+          "errors",
+          "ownable",
+          "OwnableError"
+        ]
+      }
+    },
+    {
+      "id": 32,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 33
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 9
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 33
+          },
+          {
+            "name": "E",
+            "type": 9
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 33,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
                 "index": 0,
                 "name": "None"
               },
@@ -2833,116 +2943,6 @@
         ],
         "path": [
           "Option"
-        ]
-      }
-    },
-    {
-      "id": 31,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 32
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 9
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 32
-          },
-          {
-            "name": "E",
-            "type": 9
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 32,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 7
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 33
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 7
-          },
-          {
-            "name": "E",
-            "type": 33
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 33,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "index": 0,
-                "name": "CallerIsNotOwner"
-              },
-              {
-                "index": 1,
-                "name": "NewOwnerIsZero"
-              }
-            ]
-          }
-        },
-        "path": [
-          "openbrush_contracts",
-          "traits",
-          "errors",
-          "ownable",
-          "OwnableError"
         ]
       }
     },
