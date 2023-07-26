@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-#[openbrush::implementation(PSP22, PSP22Mintable, Ownable, Pausable)]
+#[openbrush::implementation(Ownable, Pausable)]
 #[openbrush::contract]
 pub mod bet_a0 {
     use bet_a0::traits::core::*;
@@ -94,11 +94,11 @@ pub mod bet_a0 {
     }
 
     impl Core for CoreContract {
-        #[modifiers(only_owner)]
-        #[ink(message)]
-        fn mint(&mut self, account: AccountId, amount: Balance) -> Result<(), PSP22Error> {
-            psp22::Internal::_mint_to(self, account, amount)
-        }
+        // #[modifiers(only_owner)]
+        // #[ink(message)]
+        // fn mint(&mut self, account: AccountId, amount: Balance) -> Result<(), PSP22Error> {
+        //     psp22::Internal::_mint_to(self, account, amount)
+        // }
     }
 
     #[ink(event)]

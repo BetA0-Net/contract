@@ -11,10 +11,8 @@ use openbrush::{
 };
 
 #[openbrush::wrapper]
-pub type CoreRef = dyn PSP22 + PSP22Mintable + Ownable + Pausable;
+pub type CoreRef = dyn BetA0Core;
 
 #[openbrush::trait_definition]
-pub trait Core: PSP22 + PSP22Mintable + Ownable + Pausable {
-    #[ink(message)]
-    fn mint(&mut self, account: AccountId, amount: Balance) -> Result<(), PSP22Error>;
+pub trait BetA0Core: Ownable + Pausable {
 }
