@@ -1,2 +1,2 @@
 pub mod bet_token;
-pub mod core;
+pub mod beta0_core;

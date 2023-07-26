@@ -3,7 +3,7 @@
 #[openbrush::implementation(Ownable, Pausable)]
 #[openbrush::contract]
 pub mod bet_a0 {
-    use bet_a0::traits::core::*;
+    use bet_a0::traits::beta0_core::*;
     use ink::storage::Mapping;
     use openbrush::{
         contracts::{
