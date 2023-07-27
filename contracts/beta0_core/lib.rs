@@ -1,10 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-#[openbrush::implementation(Ownable, Pausable)]
+#[openbrush::implementation(PSP22, Ownable, Pausable)]
 #[openbrush::contract]
 pub mod bet_a0 {
     use bet_a0::traits::beta0_core::*;
-    use ink::storage::Mapping;
+    use ink::{
+        codegen::{EmitEvent, Env},
+        storage::Mapping,
+    };
     use openbrush::{
         contracts::{
             ownable::{OwnableError, *},
@@ -12,7 +15,7 @@ pub mod bet_a0 {
             psp22::PSP22Error,
         },
         modifiers,
-        traits::{Storage, String},
+        traits::{DefaultEnv, Storage, String},
     };
 
     // Custom err
@@ -93,14 +96,6 @@ pub mod bet_a0 {
         max_under_number: u32,
     }
 
-    impl Core for CoreContract {
-        // #[modifiers(only_owner)]
-        // #[ink(message)]
-        // fn mint(&mut self, account: AccountId, amount: Balance) -> Result<(), PSP22Error> {
-        //     psp22::Internal::_mint_to(self, account, amount)
-        // }
-    }
-
     #[ink(event)]
     pub struct WinEvent {
         player: Option<AccountId>,
@@ -128,6 +123,56 @@ pub mod bet_a0 {
         bet_amount: Balance,
     }
 
+    impl BetA0Core for CoreContract {
+        /// Play
+        #[ink(message)]
+        #[ink(payable)]
+        fn play(&mut self, bet_number: u32, is_over: u8) -> Result<(), PSP22Error> {
+            // state contract
+            if pausable::Internal::_paused(self) {
+                return Err(PSP22Error::Custom(String::from("P::Contract is paused")));
+            }
+
+            let player = self.env().caller();
+            let bet_amount = self.env().transferred_value();
+            let max_bet = (self.env().balance())
+                .checked_div(self.manager.max_bet_ratio as u128)
+                .unwrap();
+
+            assert!((1..=max_bet).contains(&bet_amount));
+
+            if is_over == 1 {
+                assert!((self.min_over_number..=self.max_over_number).contains(&bet_number));
+            } else if is_over == 0 {
+                assert!((self.min_under_number..=self.max_under_number).contains(&bet_number));
+            }
+
+            let bet_info = self.manager.bets.get(&player);
+
+            if let Some(_unwrapped_bet_info) = bet_info {
+                return Err(PSP22Error::Custom(String::from("O::Bet Not Finalized")));
+            }
+
+            let new_bet = BetInformation {
+                is_over,
+                bet_number,
+                bet_amount,
+            };
+
+            //Update listed token
+            self.manager.bets.insert(&player, &new_bet);
+
+            self.env().emit_event(PlayEvent {
+                player: Some(player),
+                is_over,
+                bet_number,
+                bet_amount,
+            });
+
+            Ok(())
+        }
+    }
+
     impl CoreContract {
         #[ink(constructor)]
         pub fn new(
@@ -141,7 +186,7 @@ pub mod bet_a0 {
             admin_account: AccountId,
         ) -> Self {
             let mut instance = Self::default();
-            let caller = Self::env().caller();
+            let caller = <Self as DefaultEnv>::env().caller();
             ownable::Internal::_init_with_owner(&mut instance, caller);
             instance
                 .initialize(
@@ -163,7 +208,7 @@ pub mod bet_a0 {
         /// Function changes state
         #[ink(message)]
         pub fn change_state(&mut self) -> Result<(), PausableError> {
-            let caller = Self::env().caller();
+            let caller = <Self as DefaultEnv>::env().caller();
             if let Some(owner) = Ownable::owner(self) {
                 if caller != owner {
                     return Err(From::from(PausableError::Paused));
@@ -248,10 +293,12 @@ pub mod bet_a0 {
                 .checked_div(self.manager.token_ratio as u128)
                 .unwrap();
 
-            let contract_balance =
-                PSP22Ref::balance_of(&self.manager.bet_token_address, Self::env().account_id());
+            let contract_balance = BetA0CoreRef::balance_of(
+                &self.manager.bet_token_address,
+                <Self as DefaultEnv>::env().account_id(),
+            );
             if contract_balance >= to_sent {
-                assert!(PSP22Ref::transfer(
+                assert!(BetA0CoreRef::transfer(
                     &self.manager.bet_token_address,
                     player,
                     to_sent,
@@ -259,7 +306,7 @@ pub mod bet_a0 {
                 )
                 .is_ok());
             } else if contract_balance > 0 {
-                assert!(PSP22Ref::transfer(
+                assert!(BetA0CoreRef::transfer(
                     &self.manager.bet_token_address,
                     player,
                     contract_balance,
@@ -371,54 +418,6 @@ pub mod bet_a0 {
             }
         }
 
-        /// Play
-        #[ink(message)]
-        #[ink(payable)]
-        pub fn play(&mut self, bet_number: u32, is_over: u8) -> Result<(), Error> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(Error::Custom(String::from("P::Contract is paused")));
-            }
-
-            let player = self.env().caller();
-            let bet_amount = self.env().transferred_value();
-            let max_bet = (self.env().balance())
-                .checked_div(self.manager.max_bet_ratio as u128)
-                .unwrap();
-
-            assert!((1..=max_bet).contains(&bet_amount));
-
-            if is_over == 1 {
-                assert!((self.min_over_number..=self.max_over_number).contains(&bet_number));
-            } else if is_over == 0 {
-                assert!((self.min_under_number..=self.max_under_number).contains(&bet_number));
-            }
-
-            let bet_info = self.manager.bets.get(&player);
-
-            if let Some(_unwrapped_bet_info) = bet_info {
-                return Err(Error::Custom(String::from("O::Bet Not Finalized")));
-            }
-
-            let new_bet = BetInformation {
-                is_over,
-                bet_number,
-                bet_amount,
-            };
-
-            //Update listed token
-            self.manager.bets.insert(&player, &new_bet);
-
-            self.env().emit_event(PlayEvent {
-                player: Some(player),
-                is_over,
-                bet_number,
-                bet_amount,
-            });
-
-            Ok(())
-        }
-
         /// Withdraw Fees - only Owner
         #[ink(message)]
         #[openbrush::modifiers(only_owner)]
@@ -445,11 +444,14 @@ pub mod bet_a0 {
             }
 
             if value
-                > PSP22Ref::balance_of(&self.manager.bet_token_address, Self::env().account_id())
+                > BetA0CoreRef::balance_of(
+                    &self.manager.bet_token_address,
+                    <Self as DefaultEnv>::env().account_id(),
+                )
             {
                 return Err(Error::Custom(String::from("O::Not Enough Balance")));
             }
-            assert!(PSP22Ref::transfer(
+            assert!(BetA0CoreRef::transfer(
                 &self.manager.bet_token_address,
                 self.env().caller(),
                 value,
@@ -604,7 +606,10 @@ pub mod bet_a0 {
         /// get contract token balance
         #[ink(message)]
         pub fn get_token_balance(&self) -> Balance {
-            PSP22Ref::balance_of(&self.manager.bet_token_address, Self::env().account_id())
+            BetA0CoreRef::balance_of(
+                &self.manager.bet_token_address,
+                <Self as DefaultEnv>::env().account_id(),
+            )
         }
 
         /// Get token ratio
