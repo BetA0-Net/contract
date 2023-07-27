@@ -43,7 +43,6 @@ pub mod bet_token {
         metadata: metadata::Data,
         #[storage_field]
         data: Data,
-        cap: Balance,
     }
 
     impl BetToken for BetTokenContract {
@@ -60,42 +59,10 @@ pub mod bet_token {
         }
     }
 
-    // Custom err
-    #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    pub enum Error {
-        Custom(String),
-        PausableError(PausableError),
-    }
-
-    impl From<PausableError> for Error {
-        fn from(pausable: PausableError) -> Self {
-            match pausable {
-                PausableError::Paused => Error::Custom(String::from("P::Paused")),
-                PausableError::NotPaused => Error::Custom(String::from("P::NotPaused")),
-            }
-        }
-    }
-
-    #[modifiers(when_not_paused)]
-    #[overrider(Internal)]
-    fn _before_token_transfer(
-        &mut self,
-        from: Option<&AccountId>,
-        _to: Option<&AccountId>,
-        amount: &Balance,
-    ) -> Result<(), PSP22Error> {
-        if from.is_none() && (self.total_supply() + amount) > self.cap() {
-            return Err(PSP22Error::Custom(String::from("Cap exceeded")));
-        }
-        Ok(())
-    }
-
     impl BetTokenContract {
         #[ink(constructor)]
         pub fn new(
             initial_supply: Balance,
-            cap: Balance,
             minter: AccountId,
             name: Option<String>,
             symbol: Option<String>,
@@ -108,8 +75,7 @@ pub mod bet_token {
             instance.metadata.symbol.set(&symbol);
             instance.metadata.decimals.set(&decimal);
             instance.data.minter = minter;
-            assert!(instance._init_cap(cap).is_ok());
-            assert!(instance.mint(caller, initial_supply).is_ok());
+            assert!(instance.mint(minter, initial_supply).is_ok());
             instance
         }
 
@@ -141,8 +107,7 @@ pub mod bet_token {
                 return Err(PSP22Error::Custom(String::from("P::Contract is paused")));
             }
 
-            let caller = Self::env().caller();
-            if self.data.minter != caller {
+            if self.data.minter != account {
                 return Err(PSP22Error::Custom(String::from("Only minter can mint")));
             }
             psp22::Internal::_mint_to(self, account, amount)
@@ -176,22 +141,7 @@ pub mod bet_token {
             self.data.minter
         }
 
-        /// Get cap
-        #[ink(message)]
-        pub fn cap(&self) -> Balance {
-            self.cap
-        }
-
         // SET FUNCTIONS
-        /// Initializes the token's cap
-        fn _init_cap(&mut self, cap: Balance) -> Result<(), PSP22Error> {
-            if cap <= 0 {
-                return Err(PSP22Error::Custom(String::from("Cap must be above 0")));
-            }
-            self.cap = cap;
-            Ok(())
-        }
-
         /// Set minter
         #[ink(message)]
         #[openbrush::modifiers(only_owner)]

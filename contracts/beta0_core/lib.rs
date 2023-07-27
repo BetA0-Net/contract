@@ -61,6 +61,10 @@ pub mod bet_a0 {
         token_ratio: u32,
         bets: Mapping<AccountId, BetInformation>,
         admin_account: AccountId,
+        revenue_ratio: u32,
+        reward_pool: AccountId,
+        general_pool: AccountId,
+        bet_pool: AccountId,
         _reserved: Option<()>,
     }
 
@@ -74,6 +78,10 @@ pub mod bet_a0 {
                 token_ratio: Default::default(),
                 bets: Default::default(),
                 admin_account: [0u8; 32].into(),
+                revenue_ratio: Default::default(),
+                reward_pool: [0u8; 32].into(),
+                general_pool: [0u8; 32].into(),
+                bet_pool: [0u8; 32].into(),
                 _reserved: Default::default(),
             }
         }
@@ -177,6 +185,10 @@ pub mod bet_a0 {
         #[ink(constructor)]
         pub fn new(
             max_bet_ratio: u32,
+            revenue_ratio: u32,
+            reward_pool: AccountId,
+            general_pool: AccountId,
+            bet_pool: AccountId,
             bet_token_address: AccountId,
             token_ratio: u32,
             min_over_number: u32,
@@ -191,6 +203,10 @@ pub mod bet_a0 {
             instance
                 .initialize(
                     max_bet_ratio,
+                    revenue_ratio,
+                    reward_pool,
+                    general_pool,
+                    bet_pool,
                     bet_token_address,
                     token_ratio,
                     min_over_number,
@@ -230,6 +246,10 @@ pub mod bet_a0 {
         pub fn initialize(
             &mut self,
             max_bet_ratio: u32,
+            revenue_ratio: u32,
+            reward_pool: AccountId,
+            general_pool: AccountId,
+            bet_pool: AccountId,
             bet_token_address: AccountId,
             token_ratio: u32,
             min_over_number: u32,
@@ -267,6 +287,11 @@ pub mod bet_a0 {
             ]
             .to_vec();
             self.manager.max_bet_ratio = max_bet_ratio;
+            assert!((1..=99).contains(&revenue_ratio));
+            self.manager.reward_pool = reward_pool;
+            self.manager.general_pool = general_pool;
+            self.manager.bet_pool = bet_pool;
+            self.manager.revenue_ratio = revenue_ratio;
             self.manager.bet_token_address = bet_token_address;
             self.manager.token_ratio = token_ratio;
             self.min_over_number = min_over_number;
@@ -493,7 +518,7 @@ pub mod bet_a0 {
 
         /// Set new psp22 address
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_bet_token_address(&mut self, bet_token_address: AccountId) -> Result<(), Error> {
             self.manager.bet_token_address = bet_token_address;
             Ok(())
@@ -501,7 +526,7 @@ pub mod bet_a0 {
 
         /// Set new token ratio
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_token_ratio(&mut self, token_ratio: u32) -> Result<(), Error> {
             self.manager.token_ratio = token_ratio;
             Ok(())
@@ -509,7 +534,7 @@ pub mod bet_a0 {
 
         /// Set min number over roll
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_min_number_over_roll(&mut self, min_over_number: u32) -> Result<(), Error> {
             self.min_over_number = min_over_number;
             Ok(())
@@ -517,7 +542,7 @@ pub mod bet_a0 {
 
         /// Set max number over roll
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_max_number_over_roll(&mut self, max_over_number: u32) -> Result<(), Error> {
             self.max_over_number = max_over_number;
             Ok(())
@@ -525,7 +550,7 @@ pub mod bet_a0 {
 
         /// Set min number under roll
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_min_number_under_roll(&mut self, min_under_number: u32) -> Result<(), Error> {
             self.min_under_number = min_under_number;
             Ok(())
@@ -533,23 +558,55 @@ pub mod bet_a0 {
 
         /// Set max number under roll
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_max_number_under_roll(&mut self, max_under_number: u32) -> Result<(), Error> {
             self.max_under_number = max_under_number;
             Ok(())
         }
 
-        /// Setters
+        /// Set max bet ratio
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_max_bet_ratio(&mut self, max_bet_ratio: u32) -> Result<(), Error> {
             self.manager.max_bet_ratio = max_bet_ratio;
             Ok(())
         }
 
+        /// Set revenue_ratio
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_revenue_ratio(&mut self, revenue_ratio: u32) -> Result<(), Error> {
+            self.manager.revenue_ratio = revenue_ratio;
+            Ok(())
+        }
+
+        /// Set reward_pool
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_reward_pool(&mut self, reward_pool: AccountId) -> Result<(), Error> {
+            self.manager.reward_pool = reward_pool;
+            Ok(())
+        }
+
+        /// Set max bet ratio
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_general_pool(&mut self, general_pool: AccountId) -> Result<(), Error> {
+            self.manager.general_pool = general_pool;
+            Ok(())
+        }
+
+        /// Set bet_pool
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_bet_pool(&mut self, bet_pool: AccountId) -> Result<(), Error> {
+            self.manager.bet_pool = bet_pool;
+            Ok(())
+        }
+
         /// Set admin id
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_admin_account(&mut self, admin_account: AccountId) -> Result<(), Error> {
             self.manager.admin_account = admin_account;
             Ok(())
@@ -616,6 +673,30 @@ pub mod bet_a0 {
         #[ink(message)]
         pub fn get_token_ratio(&self) -> u32 {
             self.manager.token_ratio
+        }
+
+        /// get revenue ratio
+        #[ink(message)]
+        pub fn get_revenue_ratio(&self) -> u32 {
+            self.manager.revenue_ratio
+        }
+
+        /// get reward pool
+        #[ink(message)]
+        pub fn get_reward_pool(&self) -> AccountId {
+            self.manager.reward_pool
+        }
+
+        /// get general pool
+        #[ink(message)]
+        pub fn get_general_pool(&self) -> AccountId {
+            self.manager.general_pool
+        }
+
+        /// get bet pool
+        #[ink(message)]
+        pub fn get_bet_pool(&self) -> AccountId {
+            self.manager.bet_pool
         }
 
         /// Get psp22 address
