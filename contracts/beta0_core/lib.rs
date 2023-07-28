@@ -1,9 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-#[openbrush::implementation(PSP22, Ownable, Pausable)]
+#[openbrush::implementation(Ownable, Pausable)]
 #[openbrush::contract]
 pub mod bet_a0 {
     use bet_a0::traits::beta0_core::*;
+    use ink::prelude::vec::Vec;
     use ink::{
         codegen::{EmitEvent, Env},
         storage::Mapping,
@@ -90,8 +91,6 @@ pub mod bet_a0 {
     #[ink(storage)]
     #[derive(Default, Storage)]
     pub struct CoreContract {
-        #[storage_field]
-        psp22: psp22::Data,
         #[storage_field]
         ownable: ownable::Data,
         #[storage_field]
@@ -242,7 +241,7 @@ pub mod bet_a0 {
 
         /// Function init
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn initialize(
             &mut self,
             max_bet_ratio: u32,
@@ -287,7 +286,7 @@ pub mod bet_a0 {
             ]
             .to_vec();
             self.manager.max_bet_ratio = max_bet_ratio;
-            assert!((1..=99).contains(&revenue_ratio));
+            assert!((1..=1000).contains(&revenue_ratio));
             self.manager.reward_pool = reward_pool;
             self.manager.general_pool = general_pool;
             self.manager.bet_pool = bet_pool;
@@ -299,6 +298,91 @@ pub mod bet_a0 {
             self.min_under_number = min_under_number;
             self.max_under_number = max_under_number;
             self.manager.admin_account = admin_account;
+            Ok(())
+        }
+
+        /// tranfer token to pool
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn tranfer_token_to_pool(
+            &mut self,
+            pool: AccountId,
+            amount: Balance,
+        ) -> Result<(), Error> {
+            // state contract
+            if pausable::Internal::_paused(self) {
+                return Err(Error::Custom(String::from("P::Contract is paused")));
+            }
+
+            let contract_balance = BetA0CoreRef::balance_of(
+                &self.manager.bet_token_address,
+                <Self as DefaultEnv>::env().account_id(),
+            );
+
+            if contract_balance > 0 {
+                assert!(BetA0CoreRef::transfer(
+                    &self.manager.bet_token_address,
+                    pool,
+                    amount,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
+            } else {
+                return Err(Error::Custom(String::from("O::Not Enough Balance")));
+            }
+
+            Ok(())
+        }
+
+        /// reward token by bet pool
+        #[ink(message)]
+        pub fn reward_token_to_player(
+            &mut self,
+            player: AccountId,
+            bet_amount: Balance,
+        ) -> Result<(), Error> {
+            // state contract
+            if pausable::Internal::_paused(self) {
+                return Err(Error::Custom(String::from("P::Contract is paused")));
+            }
+
+            let to_sent = bet_amount
+                .checked_div(self.manager.token_ratio as u128)
+                .unwrap();
+
+            let pool_balance =
+                BetA0CoreRef::balance_of(&self.manager.bet_token_address, self.manager.bet_pool);
+
+            // ensure the user gave allowance to the contract
+            if BetA0CoreRef::allowance(
+                &self.manager.bet_token_address,
+                self.manager.bet_pool,
+                <Self as DefaultEnv>::env().account_id(),
+            ) < to_sent
+            {
+                return Err(Error::Custom(String::from("InsufficientAllowanceToLend")));
+            }
+
+            if pool_balance >= to_sent {
+                assert!(BetA0CoreRef::transfer_from(
+                    &self.manager.bet_token_address,
+                    self.manager.bet_pool,
+                    player,
+                    to_sent,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
+            } else if pool_balance > 0 {
+                assert!(BetA0CoreRef::transfer_from(
+                    &self.manager.bet_token_address,
+                    self.manager.bet_pool,
+                    player,
+                    to_sent,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
+            }
+            //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
             Ok(())
         }
 
@@ -322,6 +406,7 @@ pub mod bet_a0 {
                 &self.manager.bet_token_address,
                 <Self as DefaultEnv>::env().account_id(),
             );
+
             if contract_balance >= to_sent {
                 assert!(BetA0CoreRef::transfer(
                     &self.manager.bet_token_address,
@@ -369,8 +454,8 @@ pub mod bet_a0 {
                 if is_over == 1 {
                     assert!((self.min_over_number..=self.max_over_number).contains(&bet_number));
                     if random_number > bet_number {
-                        //WIN
-                        //How much to send to winner
+                        // WIN
+                        // How much to send to winner
                         let win_amount = (self.manager.over_rates[bet_number as usize] as Balance)
                             .checked_mul(bet_amount)
                             .unwrap()
@@ -379,7 +464,10 @@ pub mod bet_a0 {
                         if win_amount.checked_sub(bet_amount) > Some(self.env().balance()) {
                             return Err(Error::Custom(String::from("O::Not Enough Balance")));
                         }
+
                         assert!(self.env().transfer(player, win_amount).is_ok());
+
+                        // event
                         self.env().emit_event(WinEvent {
                             player: Some(player),
                             is_over,
@@ -389,7 +477,28 @@ pub mod bet_a0 {
                             win_amount,
                         });
                     } else {
-                        //LOSE
+                        // LOSE
+                        // send to pool
+                        let lose_amount = bet_amount
+                            .checked_mul(self.manager.revenue_ratio as u128)
+                            .unwrap()
+                            .checked_div(100)
+                            .unwrap();
+
+                        assert!(self
+                            .env()
+                            .transfer(self.manager.reward_pool, lose_amount)
+                            .is_ok());
+
+                        assert!(self
+                            .env()
+                            .transfer(
+                                self.manager.general_pool,
+                                bet_amount.checked_sub(lose_amount).unwrap()
+                            )
+                            .is_ok());
+
+                        // event
                         self.env().emit_event(LoseEvent {
                             player: Some(player),
                             is_over,
@@ -401,8 +510,8 @@ pub mod bet_a0 {
                 } else if is_over == 0 {
                     assert!((self.min_under_number..=self.max_under_number).contains(&bet_number));
                     if random_number < bet_number {
-                        //WIN
-                        //How much to send to winner
+                        // WIN
+                        // How much to send to winner
                         let win_amount = (self.manager.under_rates[bet_number as usize] as Balance)
                             .checked_mul(bet_amount)
                             .unwrap()
@@ -411,7 +520,10 @@ pub mod bet_a0 {
                         if win_amount.checked_sub(bet_amount) > Some(self.env().balance()) {
                             return Err(Error::Custom(String::from("O::Not Enough Balance")));
                         }
+
                         assert!(self.env().transfer(player, win_amount).is_ok());
+
+                        // event
                         self.env().emit_event(WinEvent {
                             player: Some(player),
                             is_over,
@@ -421,7 +533,28 @@ pub mod bet_a0 {
                             win_amount,
                         });
                     } else {
-                        //LOSE
+                        // LOSE
+                        // send to pool
+                        let lose_amount = bet_amount
+                            .checked_mul(self.manager.revenue_ratio as u128)
+                            .unwrap()
+                            .checked_div(100)
+                            .unwrap();
+
+                        assert!(self
+                            .env()
+                            .transfer(self.manager.reward_pool, lose_amount)
+                            .is_ok());
+
+                        assert!(self
+                            .env()
+                            .transfer(
+                                self.manager.general_pool,
+                                bet_amount.checked_sub(lose_amount).unwrap()
+                            )
+                            .is_ok());
+
+                        // event
                         self.env().emit_event(LoseEvent {
                             player: Some(player),
                             is_over,
@@ -434,7 +567,7 @@ pub mod bet_a0 {
                     return Err(Error::Custom(String::from("O::Invalid Input")));
                 }
 
-                assert!(self.reward_token(player, bet_amount).is_ok());
+                assert!(self.reward_token_to_player(player, bet_amount).is_ok());
 
                 // PSP22Ref::mint(&self.manager.psp22,player,bet_amount/(self.manager.token_ratio as u256));
                 Ok(())
@@ -445,7 +578,7 @@ pub mod bet_a0 {
 
         /// Withdraw Fees - only Owner
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
             // state contract
             if pausable::Internal::_paused(self) {
@@ -461,7 +594,7 @@ pub mod bet_a0 {
 
         /// Withdraw Fees - only Owner
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn withdraw_token(&mut self, value: Balance) -> Result<(), Error> {
             // state contract
             if pausable::Internal::_paused(self) {
@@ -503,7 +636,7 @@ pub mod bet_a0 {
 
         /// Set over_rates and discount rate - Only Owner 2 vectors same size
         #[ink(message)]
-        #[openbrush::modifiers(only_owner)]
+        #[modifiers(only_owner)]
         pub fn set_rates(
             &mut self,
             over_rates: Vec<u32>,
@@ -667,6 +800,12 @@ pub mod bet_a0 {
                 &self.manager.bet_token_address,
                 <Self as DefaultEnv>::env().account_id(),
             )
+        }
+
+        /// get token balance pool
+        #[ink(message)]
+        pub fn get_token_balance_pool(&self, pool: AccountId) -> Balance {
+            BetA0CoreRef::balance_of(&self.manager.bet_token_address, pool)
         }
 
         /// Get token ratio
