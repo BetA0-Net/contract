@@ -11,6 +11,9 @@ pub type BetA0CoreRef = dyn PSP22 + BetA0CoreTrait;
 #[openbrush::trait_definition]
 pub trait BetA0CoreTrait: Ownable + Pausable {
     //Execute function
+    /// Function changes state
+    #[ink(message)]
+    fn change_state(&mut self) -> Result<(), PausableError>;
 
     // Set function
     /// setcode

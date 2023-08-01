@@ -60,6 +60,11 @@ pub mod bet_a0 {
 
     impl BetA0CoreTrait for BetA0CoreContract {
         // Execute function
+        /// Function changes state
+        #[ink(message)]
+        fn change_state(&mut self) -> Result<(), PausableError>{
+            BetA0CoreTraitImpl::change_state(self)
+        }
 
         // Set function
         /// setcode

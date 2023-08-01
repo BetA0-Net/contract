@@ -8,7 +8,7 @@ pub use crate::{
 };
 use ink::prelude::vec::Vec;
 use openbrush::{
-    contracts::{ownable, pausable, psp22::*},
+    contracts::{ownable::*, pausable::*, psp22::*},
     traits::{AccountId, Balance, Storage, String},
 };
 
@@ -18,6 +18,23 @@ pub trait BetA0CoreTraitImpl:
     Storage<Manager> + Storage<pausable::Data> + Storage<ownable::Data>
 {
     // Execute function
+    /// Function changes state
+    fn change_state(&mut self) -> Result<(), PausableError> {
+        let caller = Self::env().caller();
+        if let Some(owner) = Ownable::owner(self) {
+            if caller != owner {
+                return Err(From::from(PausableError::Paused));
+            }
+
+            if pausable::Internal::_paused(self) {
+                pausable::Internal::_unpause(self)
+            } else {
+                pausable::Internal::_pause(self)
+            }
+        } else {
+            return Err(From::from(PausableError::Paused));
+        }
+    }
 
     // Set Function
     /// Set hash code
