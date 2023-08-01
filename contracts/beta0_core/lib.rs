@@ -3,13 +3,11 @@
 #[openbrush::implementation(Ownable, Pausable)]
 #[openbrush::contract]
 pub mod bet_a0 {
-    use bet_a0::impls::beta0_core::{CoreImpl, *};
-    // use bet_a0::traits::beta0_core::*;
-    use ink::prelude::vec::Vec;
-    use ink::{
-        codegen::{EmitEvent, Env},
-        storage::Mapping,
+    use bet_a0::impls::beta0_core::{
+        data::Manager, BetA0CoreTraitImpl, BetInformation, CoreError, *,
     };
+    // use ink::codegen::{EmitEvent, Env};
+    use ink::prelude::vec::Vec;
     use openbrush::{
         contracts::{
             ownable::{OwnableError, *},
@@ -20,88 +18,15 @@ pub mod bet_a0 {
         traits::{DefaultEnv, Storage, String},
     };
 
-    // Custom err
-    #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    pub enum Error {
-        Custom(String),
-    }
-
-    impl From<OwnableError> for Error {
-        fn from(ownable: OwnableError) -> Self {
-            match ownable {
-                OwnableError::CallerIsNotOwner => {
-                    Error::Custom(String::from("O::CallerIsNotOwner"))
-                }
-                OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
-            }
-        }
-    }
-
-    #[cfg(feature = "std")]
-    use ink::storage::traits::StorageLayout;
-
-    #[derive(
-        Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq, Default, scale::Encode, scale::Decode,
-    )]
-    #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
-    pub struct BetInformation {
-        pub is_over: u8,
-        pub bet_number: u32,
-        pub bet_amount: Balance,
-    }
-
-    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
-
-    #[derive(Debug)]
-    #[openbrush::storage_item]
-    pub struct Manager {
-        over_rates: Vec<u32>,
-        under_rates: Vec<u32>,
-        max_bet_ratio: u32,
-        bet_token_address: AccountId,
-        token_ratio: u32,
-        bets: Mapping<AccountId, BetInformation>,
-        admin_account: AccountId,
-        revenue_ratio: u32,
-        reward_pool: AccountId,
-        general_pool: AccountId,
-        bet_pool: AccountId,
-        _reserved: Option<()>,
-    }
-
-    impl Default for Manager {
-        fn default() -> Self {
-            Self {
-                over_rates: Default::default(),
-                under_rates: Default::default(),
-                max_bet_ratio: Default::default(),
-                bet_token_address: [0u8; 32].into(),
-                token_ratio: Default::default(),
-                bets: Default::default(),
-                admin_account: [0u8; 32].into(),
-                revenue_ratio: Default::default(),
-                reward_pool: [0u8; 32].into(),
-                general_pool: [0u8; 32].into(),
-                bet_pool: [0u8; 32].into(),
-                _reserved: Default::default(),
-            }
-        }
-    }
-
     #[ink(storage)]
     #[derive(Default, Storage)]
-    pub struct CoreContract {
+    pub struct BetA0CoreContract {
         #[storage_field]
         ownable: ownable::Data,
         #[storage_field]
         pausable: pausable::Data,
         #[storage_field]
         manager: Manager,
-        min_over_number: u32,
-        max_over_number: u32,
-        min_under_number: u32,
-        max_under_number: u32,
     }
 
     #[ink(event)]
@@ -131,68 +56,218 @@ pub mod bet_a0 {
         bet_amount: Balance,
     }
 
-    impl CoreImpl for CoreContract {}
+    impl BetA0CoreTraitImpl for BetA0CoreContract {}
 
-    impl BetA0Core for CoreContract {
-        //Execute function
-        /// Play
-        #[ink(message)]
-        #[ink(payable)]
-        fn play(&mut self, bet_number: u32, is_over: u8) -> Result<(), PSP22Error> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(PSP22Error::Custom(String::from("P::Contract is paused")));
-            }
-
-            let player = self.env().caller();
-            let bet_amount = self.env().transferred_value();
-            let max_bet = (self.env().balance())
-                .checked_div(self.manager.max_bet_ratio as u128)
-                .unwrap();
-
-            assert!((1..=max_bet).contains(&bet_amount));
-
-            if is_over == 1 {
-                assert!((self.min_over_number..=self.max_over_number).contains(&bet_number));
-            } else if is_over == 0 {
-                assert!((self.min_under_number..=self.max_under_number).contains(&bet_number));
-            }
-
-            let bet_info = self.manager.bets.get(&player);
-
-            if let Some(_unwrapped_bet_info) = bet_info {
-                return Err(PSP22Error::Custom(String::from("O::Bet Not Finalized")));
-            }
-
-            let new_bet = BetInformation {
-                is_over,
-                bet_number,
-                bet_amount,
-            };
-
-            //Update listed token
-            self.manager.bets.insert(&player, &new_bet);
-
-            self.env().emit_event(PlayEvent {
-                player: Some(player),
-                is_over,
-                bet_number,
-                bet_amount,
-            });
-
-            Ok(())
-        }
+    impl BetA0CoreTrait for BetA0CoreContract {
+        // Execute function
 
         // Set function
         /// setcode
         #[ink(message)]
         #[modifiers(only_owner)]
         fn set_code(&mut self, code_hash: [u8; 32]) -> Result<(), CoreError> {
-            CoreImpl::set_code(self, code_hash)
+            BetA0CoreTraitImpl::set_code(self, code_hash)
+        }
+
+        /// Set min number over roll
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_min_number_over_roll(&mut self, min_over_number: u32) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_min_number_over_roll(self, min_over_number)
+        }
+
+        /// Set max number over roll
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_max_number_over_roll(&mut self, max_over_number: u32) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_max_number_over_roll(self, max_over_number)
+        }
+
+        /// Set min number under roll
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_min_number_under_roll(&mut self, min_under_number: u32) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_min_number_under_roll(self, min_under_number)
+        }
+
+        /// Set max number under roll
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_max_number_under_roll(&mut self, max_under_number: u32) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_max_number_under_roll(self, max_under_number)
+        }
+
+        /// Set over_rates and discount rate - Only Owner 2 vectors same size
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_rates(
+            &mut self,
+            over_rates: Vec<u32>,
+            under_rates: Vec<u32>,
+        ) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_rates(self, over_rates, under_rates)
+        }
+
+        /// Set new psp22 address
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_bet_token_address(&mut self, bet_token_address: AccountId) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_bet_token_address(self, bet_token_address)
+        }
+
+        /// Set new token ratio
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_token_ratio(&mut self, token_ratio: u32) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_token_ratio(self, token_ratio)
+        }
+
+        /// Set max bet ratio
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_max_bet_ratio(&mut self, max_bet_ratio: u32) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_max_bet_ratio(self, max_bet_ratio)
+        }
+
+        /// Set revenue_ratio
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_revenue_ratio(&mut self, revenue_ratio: u32) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_revenue_ratio(self, revenue_ratio)
+        }
+
+        /// Set reward_pool
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_reward_pool(&mut self, reward_pool: AccountId) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_reward_pool(self, reward_pool)
+        }
+
+        /// Set max bet ratio
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_general_pool(&mut self, general_pool: AccountId) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_general_pool(self, general_pool)
+        }
+
+        /// Set bet_pool
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_bet_pool(&mut self, bet_pool: AccountId) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_bet_pool(self, bet_pool)
+        }
+
+        /// Set admin id
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_admin_account(&mut self, admin_account: AccountId) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::set_admin_account(self, admin_account)
+        }
+
+        // Get Function
+        /// get min number over roll
+        #[ink(message)]
+        fn get_min_number_over_roll(&self) -> u32 {
+            BetA0CoreTraitImpl::get_min_number_over_roll(self)
+        }
+
+        /// get max number over roll
+        #[ink(message)]
+        fn get_max_number_over_roll(&self) -> u32 {
+            BetA0CoreTraitImpl::get_max_number_over_roll(self)
+        }
+
+        /// get min number under roll
+        #[ink(message)]
+        fn get_min_number_under_roll(&self) -> u32 {
+            BetA0CoreTraitImpl::get_min_number_under_roll(self)
+        }
+
+        /// get max number under roll
+        #[ink(message)]
+        fn get_max_number_under_roll(&self) -> u32 {
+            BetA0CoreTraitImpl::get_max_number_under_roll(self)
+        }
+
+        /// Get token ratio
+        #[ink(message)]
+        fn get_token_ratio(&self) -> u32 {
+            BetA0CoreTraitImpl::get_token_ratio(self)
+        }
+
+        /// get revenue ratio
+        #[ink(message)]
+        fn get_revenue_ratio(&self) -> u32 {
+            BetA0CoreTraitImpl::get_token_ratio(self)
+        }
+
+        /// get reward pool
+        #[ink(message)]
+        fn get_reward_pool(&self) -> AccountId {
+            BetA0CoreTraitImpl::get_reward_pool(self)
+        }
+
+        /// get general pool
+        #[ink(message)]
+        fn get_general_pool(&self) -> AccountId {
+            BetA0CoreTraitImpl::get_general_pool(self)
+        }
+
+        /// get bet pool
+        #[ink(message)]
+        fn get_bet_pool(&self) -> AccountId {
+            BetA0CoreTraitImpl::get_bet_pool(self)
+        }
+
+        /// Get psp22 address
+        #[ink(message)]
+        fn bet_token_address(&self) -> AccountId {
+            BetA0CoreTraitImpl::bet_token_address(self)
+        }
+
+        /// Get Over Rates
+        #[ink(message)]
+        fn get_over_rates(&self) -> Vec<u32> {
+            BetA0CoreTraitImpl::get_over_rates(self)
+        }
+
+        /// Get Under Rates
+        #[ink(message)]
+        fn get_under_rates(&self) -> Vec<u32> {
+            BetA0CoreTraitImpl::get_under_rates(self)
+        }
+
+        /// Get Max Bet
+        #[ink(message)]
+        fn get_max_bet_ratio(&self) -> u32 {
+            BetA0CoreTraitImpl::get_max_bet_ratio(self)
+        }
+
+        #[ink(message)]
+        fn get_max_bet(&self) -> u128 {
+            BetA0CoreTraitImpl::get_max_bet(self)
+        }
+
+        /// get contract token balance
+        #[ink(message)]
+        fn get_token_balance(&self) -> Balance {
+            BetA0CoreTraitImpl::get_token_balance(self)
+        }
+
+        /// get token balance pool
+        #[ink(message)]
+        fn get_token_balance_pool(&self, pool: AccountId) -> Balance {
+            BetA0CoreTraitImpl::get_token_balance_pool(self, pool)
+        }
+
+        /// Is bet exist
+        #[ink(message)]
+        fn is_bet_available(&self, player: AccountId) -> bool {
+            BetA0CoreTraitImpl::is_bet_available(self, player)
         }
     }
 
-    impl CoreContract {
+    impl BetA0CoreContract {
         #[ink(constructor)]
         pub fn new(
             max_bet_ratio: u32,
@@ -268,10 +343,10 @@ pub mod bet_a0 {
             min_under_number: u32,
             max_under_number: u32,
             admin_account: AccountId,
-        ) -> Result<(), Error> {
+        ) -> Result<(), CoreError> {
             // Make sure the initial data can only be init once
             if self.manager.bet_token_address != [0u8; 32].into() {
-                return Err(Error::Custom(String::from("Contract Already Init")));
+                return Err(CoreError::Custom(String::from("Contract Already Init")));
             }
             self.manager.over_rates = [
                 0, 0, 0, 0, 10368, 10478, 10591, 10706, 10824, 10944, 11067, 11193, 11321, 11453,
@@ -305,153 +380,80 @@ pub mod bet_a0 {
             self.manager.revenue_ratio = revenue_ratio;
             self.manager.bet_token_address = bet_token_address;
             self.manager.token_ratio = token_ratio;
-            self.min_over_number = min_over_number;
-            self.max_over_number = max_over_number;
-            self.min_under_number = min_under_number;
-            self.max_under_number = max_under_number;
+            self.manager.min_over_number = min_over_number;
+            self.manager.max_over_number = max_over_number;
+            self.manager.min_under_number = min_under_number;
+            self.manager.max_under_number = max_under_number;
             self.manager.admin_account = admin_account;
             Ok(())
         }
 
-        /// tranfer token to pool
+        /// Play
         #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn tranfer_token_to_pool(
-            &mut self,
-            pool: AccountId,
-            amount: Balance,
-        ) -> Result<(), Error> {
+        #[ink(payable)]
+        pub fn play(&mut self, bet_number: u32, is_over: u8) -> Result<(), PSP22Error> {
             // state contract
             if pausable::Internal::_paused(self) {
-                return Err(Error::Custom(String::from("P::Contract is paused")));
+                return Err(PSP22Error::Custom(String::from("P::Contract is paused")));
             }
 
-            let contract_balance = PSP22Ref::balance_of(
-                &self.manager.bet_token_address,
-                <Self as DefaultEnv>::env().account_id(),
-            );
-
-            if contract_balance > 0 {
-                assert!(PSP22Ref::transfer(
-                    &self.manager.bet_token_address,
-                    pool,
-                    amount,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            } else {
-                return Err(Error::Custom(String::from("O::Not Enough Balance")));
-            }
-
-            Ok(())
-        }
-
-        /// reward token by bet pool
-        #[ink(message)]
-        pub fn reward_token_to_player(
-            &mut self,
-            player: AccountId,
-            bet_amount: Balance,
-        ) -> Result<(), Error> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(Error::Custom(String::from("P::Contract is paused")));
-            }
-
-            let to_sent = bet_amount
-                .checked_div(self.manager.token_ratio as u128)
+            let player = self.env().caller();
+            let bet_amount = self.env().transferred_value();
+            let max_bet = (self.env().balance())
+                .checked_div(self.manager.max_bet_ratio as u128)
                 .unwrap();
 
-            let pool_balance =
-                PSP22Ref::balance_of(&self.manager.bet_token_address, self.manager.bet_pool);
+            assert!((1..=max_bet).contains(&bet_amount));
 
-            // ensure the user gave allowance to the contract
-            if PSP22Ref::allowance(
-                &self.manager.bet_token_address,
-                self.manager.bet_pool,
-                <Self as DefaultEnv>::env().account_id(),
-            ) < to_sent
-            {
-                return Err(Error::Custom(String::from("InsufficientAllowanceToLend")));
+            if is_over == 1 {
+                assert!(
+                    (self.manager.min_over_number..=self.manager.max_over_number)
+                        .contains(&bet_number)
+                );
+            } else if is_over == 0 {
+                assert!(
+                    (self.manager.min_under_number..=self.manager.max_under_number)
+                        .contains(&bet_number)
+                );
             }
 
-            if pool_balance >= to_sent {
-                assert!(PSP22Ref::transfer_from(
-                    &self.manager.bet_token_address,
-                    self.manager.bet_pool,
-                    player,
-                    to_sent,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            } else if pool_balance > 0 {
-                assert!(PSP22Ref::transfer_from(
-                    &self.manager.bet_token_address,
-                    self.manager.bet_pool,
-                    player,
-                    to_sent,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            }
-            //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
-            Ok(())
-        }
+            let bet_info = self.manager.bets.get(&player);
 
-        /// Function reward token
-        #[ink(message)]
-        pub fn reward_token(
-            &mut self,
-            player: AccountId,
-            bet_amount: Balance,
-        ) -> Result<(), Error> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(Error::Custom(String::from("P::Contract is paused")));
+            if let Some(_unwrapped_bet_info) = bet_info {
+                return Err(PSP22Error::Custom(String::from("O::Bet Not Finalized")));
             }
 
-            let to_sent = bet_amount
-                .checked_div(self.manager.token_ratio as u128)
-                .unwrap();
+            let new_bet = BetInformation {
+                is_over,
+                bet_number,
+                bet_amount,
+            };
 
-            let contract_balance = PSP22Ref::balance_of(
-                &self.manager.bet_token_address,
-                <Self as DefaultEnv>::env().account_id(),
-            );
+            //Update listed token
+            self.manager.bets.insert(&player, &new_bet);
 
-            if contract_balance >= to_sent {
-                assert!(PSP22Ref::transfer(
-                    &self.manager.bet_token_address,
-                    player,
-                    to_sent,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            } else if contract_balance > 0 {
-                assert!(PSP22Ref::transfer(
-                    &self.manager.bet_token_address,
-                    player,
-                    contract_balance,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            }
-            //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
+            self.env().emit_event(PlayEvent {
+                player: Some(player),
+                is_over,
+                bet_number,
+                bet_amount,
+            });
+
             Ok(())
         }
 
         /// Finalize Bet
         #[ink(message)]
-        pub fn finalize(&mut self, player: AccountId, random_number: u32) -> Result<(), Error> {
+        pub fn finalize(&mut self, player: AccountId, random_number: u32) -> Result<(), CoreError> {
             // state contract
             if pausable::Internal::_paused(self) {
-                return Err(Error::Custom(String::from("P::Contract is paused")));
+                return Err(CoreError::Custom(String::from("P::Contract is paused")));
             }
 
             let caller = self.env().caller();
 
             if caller != self.manager.admin_account {
-                return Err(Error::Custom(String::from("O::Caller is not admin")));
+                return Err(CoreError::Custom(String::from("O::Caller is not admin")));
             }
 
             let bet_info = self.manager.bets.get(&player);
@@ -464,7 +466,10 @@ pub mod bet_a0 {
                 self.manager.bets.remove(&player);
 
                 if is_over == 1 {
-                    assert!((self.min_over_number..=self.max_over_number).contains(&bet_number));
+                    assert!(
+                        (self.manager.min_over_number..=self.manager.max_over_number)
+                            .contains(&bet_number)
+                    );
                     if random_number > bet_number {
                         // WIN
                         // How much to send to winner
@@ -474,7 +479,7 @@ pub mod bet_a0 {
                             .checked_div(10000)
                             .unwrap();
                         if win_amount.checked_sub(bet_amount) > Some(self.env().balance()) {
-                            return Err(Error::Custom(String::from("O::Not Enough Balance")));
+                            return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
                         }
 
                         assert!(self.env().transfer(player, win_amount).is_ok());
@@ -520,7 +525,10 @@ pub mod bet_a0 {
                         });
                     }
                 } else if is_over == 0 {
-                    assert!((self.min_under_number..=self.max_under_number).contains(&bet_number));
+                    assert!(
+                        (self.manager.min_under_number..=self.manager.max_under_number)
+                            .contains(&bet_number)
+                    );
                     if random_number < bet_number {
                         // WIN
                         // How much to send to winner
@@ -530,7 +538,7 @@ pub mod bet_a0 {
                             .checked_div(10000)
                             .unwrap();
                         if win_amount.checked_sub(bet_amount) > Some(self.env().balance()) {
-                            return Err(Error::Custom(String::from("O::Not Enough Balance")));
+                            return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
                         }
 
                         assert!(self.env().transfer(player, win_amount).is_ok());
@@ -576,7 +584,7 @@ pub mod bet_a0 {
                         });
                     }
                 } else {
-                    return Err(Error::Custom(String::from("O::Invalid Input")));
+                    return Err(CoreError::Custom(String::from("O::Invalid Input")));
                 }
 
                 assert!(self.reward_token_to_player(player, bet_amount).is_ok());
@@ -584,21 +592,150 @@ pub mod bet_a0 {
                 // PSP22Ref::mint(&self.manager.psp22,player,bet_amount/(self.manager.token_ratio as u256));
                 Ok(())
             } else {
-                return Err(Error::Custom(String::from("O::Bet Not Exist")));
+                return Err(CoreError::Custom(String::from("O::Bet Not Exist")));
             }
+        }
+
+        /// tranfer token to pool
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn tranfer_token_to_pool(
+            &mut self,
+            pool: AccountId,
+            amount: Balance,
+        ) -> Result<(), CoreError> {
+            // state contract
+            if pausable::Internal::_paused(self) {
+                return Err(CoreError::Custom(String::from("P::Contract is paused")));
+            }
+
+            let contract_balance = PSP22Ref::balance_of(
+                &self.manager.bet_token_address,
+                <Self as DefaultEnv>::env().account_id(),
+            );
+
+            if contract_balance > 0 {
+                assert!(PSP22Ref::transfer(
+                    &self.manager.bet_token_address,
+                    pool,
+                    amount,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
+            } else {
+                return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
+            }
+
+            Ok(())
+        }
+
+        /// reward token by bet pool
+        #[ink(message)]
+        pub fn reward_token_to_player(
+            &mut self,
+            player: AccountId,
+            bet_amount: Balance,
+        ) -> Result<(), CoreError> {
+            // state contract
+            if pausable::Internal::_paused(self) {
+                return Err(CoreError::Custom(String::from("P::Contract is paused")));
+            }
+
+            let to_sent = bet_amount
+                .checked_div(self.manager.token_ratio as u128)
+                .unwrap();
+
+            let pool_balance =
+                PSP22Ref::balance_of(&self.manager.bet_token_address, self.manager.bet_pool);
+
+            // ensure the user gave allowance to the contract
+            if PSP22Ref::allowance(
+                &self.manager.bet_token_address,
+                self.manager.bet_pool,
+                <Self as DefaultEnv>::env().account_id(),
+            ) < to_sent
+            {
+                return Err(CoreError::Custom(String::from(
+                    "InsufficientAllowanceToLend",
+                )));
+            }
+
+            if pool_balance >= to_sent {
+                assert!(PSP22Ref::transfer_from(
+                    &self.manager.bet_token_address,
+                    self.manager.bet_pool,
+                    player,
+                    to_sent,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
+            } else if pool_balance > 0 {
+                assert!(PSP22Ref::transfer_from(
+                    &self.manager.bet_token_address,
+                    self.manager.bet_pool,
+                    player,
+                    to_sent,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
+            }
+            //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
+            Ok(())
+        }
+
+        /// Function reward token
+        #[ink(message)]
+        pub fn reward_token(
+            &mut self,
+            player: AccountId,
+            bet_amount: Balance,
+        ) -> Result<(), CoreError> {
+            // state contract
+            if pausable::Internal::_paused(self) {
+                return Err(CoreError::Custom(String::from("P::Contract is paused")));
+            }
+
+            let to_sent = bet_amount
+                .checked_div(self.manager.token_ratio as u128)
+                .unwrap();
+
+            let contract_balance = PSP22Ref::balance_of(
+                &self.manager.bet_token_address,
+                <Self as DefaultEnv>::env().account_id(),
+            );
+
+            if contract_balance >= to_sent {
+                assert!(PSP22Ref::transfer(
+                    &self.manager.bet_token_address,
+                    player,
+                    to_sent,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
+            } else if contract_balance > 0 {
+                assert!(PSP22Ref::transfer(
+                    &self.manager.bet_token_address,
+                    player,
+                    contract_balance,
+                    Vec::<u8>::new()
+                )
+                .is_ok());
+            }
+            //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
+            Ok(())
         }
 
         /// Withdraw Fees - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
+        pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), CoreError> {
             // state contract
             if pausable::Internal::_paused(self) {
-                return Err(Error::Custom(String::from("P::Contract is paused")));
+                return Err(CoreError::Custom(String::from("P::Contract is paused")));
             }
 
             if value > self.env().balance() {
-                return Err(Error::Custom(String::from("O::Not Enough Balance")));
+                return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
             }
             assert!(self.env().transfer(self.env().caller(), value).is_ok());
             Ok(())
@@ -607,10 +744,10 @@ pub mod bet_a0 {
         /// Withdraw Fees - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn withdraw_token(&mut self, value: Balance) -> Result<(), Error> {
+        pub fn withdraw_token(&mut self, value: Balance) -> Result<(), CoreError> {
             // state contract
             if pausable::Internal::_paused(self) {
-                return Err(Error::Custom(String::from("P::Contract is paused")));
+                return Err(CoreError::Custom(String::from("P::Contract is paused")));
             }
 
             if value
@@ -619,7 +756,7 @@ pub mod bet_a0 {
                     <Self as DefaultEnv>::env().account_id(),
                 )
             {
-                return Err(Error::Custom(String::from("O::Not Enough Balance")));
+                return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
             }
             assert!(PSP22Ref::transfer(
                 &self.manager.bet_token_address,
@@ -632,239 +769,7 @@ pub mod bet_a0 {
         }
 
         // SET FUNCTIONS
-        /// Set over_rates and discount rate - Only Owner 2 vectors same size
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_rates(
-            &mut self,
-            over_rates: Vec<u32>,
-            under_rates: Vec<u32>,
-        ) -> Result<(), Error> {
-            assert!(over_rates.len() == under_rates.len());
-
-            self.manager.over_rates = over_rates;
-            self.manager.under_rates = under_rates;
-            Ok(())
-        }
-
-        /// Set new psp22 address
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_bet_token_address(&mut self, bet_token_address: AccountId) -> Result<(), Error> {
-            self.manager.bet_token_address = bet_token_address;
-            Ok(())
-        }
-
-        /// Set new token ratio
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_token_ratio(&mut self, token_ratio: u32) -> Result<(), Error> {
-            self.manager.token_ratio = token_ratio;
-            Ok(())
-        }
-
-        /// Set min number over roll
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_min_number_over_roll(&mut self, min_over_number: u32) -> Result<(), Error> {
-            self.min_over_number = min_over_number;
-            Ok(())
-        }
-
-        /// Set max number over roll
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_max_number_over_roll(&mut self, max_over_number: u32) -> Result<(), Error> {
-            self.max_over_number = max_over_number;
-            Ok(())
-        }
-
-        /// Set min number under roll
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_min_number_under_roll(&mut self, min_under_number: u32) -> Result<(), Error> {
-            self.min_under_number = min_under_number;
-            Ok(())
-        }
-
-        /// Set max number under roll
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_max_number_under_roll(&mut self, max_under_number: u32) -> Result<(), Error> {
-            self.max_under_number = max_under_number;
-            Ok(())
-        }
-
-        /// Set max bet ratio
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_max_bet_ratio(&mut self, max_bet_ratio: u32) -> Result<(), Error> {
-            self.manager.max_bet_ratio = max_bet_ratio;
-            Ok(())
-        }
-
-        /// Set revenue_ratio
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_revenue_ratio(&mut self, revenue_ratio: u32) -> Result<(), Error> {
-            self.manager.revenue_ratio = revenue_ratio;
-            Ok(())
-        }
-
-        /// Set reward_pool
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_reward_pool(&mut self, reward_pool: AccountId) -> Result<(), Error> {
-            self.manager.reward_pool = reward_pool;
-            Ok(())
-        }
-
-        /// Set max bet ratio
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_general_pool(&mut self, general_pool: AccountId) -> Result<(), Error> {
-            self.manager.general_pool = general_pool;
-            Ok(())
-        }
-
-        /// Set bet_pool
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_bet_pool(&mut self, bet_pool: AccountId) -> Result<(), Error> {
-            self.manager.bet_pool = bet_pool;
-            Ok(())
-        }
-
-        /// Set admin id
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_admin_account(&mut self, admin_account: AccountId) -> Result<(), Error> {
-            self.manager.admin_account = admin_account;
-            Ok(())
-        }
 
         // GET FUNCTIONS
-        /// Is bet exist
-        #[ink(message)]
-        pub fn is_bet_available(&self, player: AccountId) -> bool {
-            let bet_info = self.manager.bets.get(&player);
-            bet_info.is_some()
-        }
-
-        /// get admin id
-        #[ink(message)]
-        pub fn get_admin_account(&self) -> AccountId {
-            self.manager.admin_account
-        }
-
-        /// Is bet exist
-        #[ink(message)]
-        pub fn get_bet(&self, player: AccountId) -> Option<BetInformation> {
-            let bet_info = self.manager.bets.get(&player);
-            if let Some(_unwrapped_bet_info) = bet_info {
-                return Some(bet_info.unwrap());
-            }
-            return None;
-        }
-
-        /// get min number over roll
-        #[ink(message)]
-        pub fn get_min_number_over_roll(&self) -> u32 {
-            self.min_over_number
-        }
-
-        /// get max number over roll
-        #[ink(message)]
-        pub fn get_max_number_over_roll(&self) -> u32 {
-            self.max_over_number
-        }
-
-        /// get min number under roll
-        #[ink(message)]
-        pub fn get_min_number_under_roll(&self) -> u32 {
-            self.min_under_number
-        }
-
-        /// get max number under roll
-        #[ink(message)]
-        pub fn get_max_number_under_roll(&self) -> u32 {
-            self.max_under_number
-        }
-
-        /// get contract token balance
-        #[ink(message)]
-        pub fn get_token_balance(&self) -> Balance {
-            PSP22Ref::balance_of(
-                &self.manager.bet_token_address,
-                <Self as DefaultEnv>::env().account_id(),
-            )
-        }
-
-        /// get token balance pool
-        #[ink(message)]
-        pub fn get_token_balance_pool(&self, pool: AccountId) -> Balance {
-            PSP22Ref::balance_of(&self.manager.bet_token_address, pool)
-        }
-
-        /// Get token ratio
-        #[ink(message)]
-        pub fn get_token_ratio(&self) -> u32 {
-            self.manager.token_ratio
-        }
-
-        /// get revenue ratio
-        #[ink(message)]
-        pub fn get_revenue_ratio(&self) -> u32 {
-            self.manager.revenue_ratio
-        }
-
-        /// get reward pool
-        #[ink(message)]
-        pub fn get_reward_pool(&self) -> AccountId {
-            self.manager.reward_pool
-        }
-
-        /// get general pool
-        #[ink(message)]
-        pub fn get_general_pool(&self) -> AccountId {
-            self.manager.general_pool
-        }
-
-        /// get bet pool
-        #[ink(message)]
-        pub fn get_bet_pool(&self) -> AccountId {
-            self.manager.bet_pool
-        }
-
-        /// Get psp22 address
-        #[ink(message)]
-        pub fn bet_token_address(&self) -> AccountId {
-            self.manager.bet_token_address
-        }
-
-        /// Get Over Rates
-        #[ink(message)]
-        pub fn get_over_rates(&self) -> Vec<u32> {
-            self.manager.over_rates.clone()
-        }
-
-        /// Get Under Rates
-        #[ink(message)]
-        pub fn get_under_rates(&self) -> Vec<u32> {
-            self.manager.under_rates.clone()
-        }
-
-        /// Get Max Bet
-        #[ink(message)]
-        pub fn get_max_bet_ratio(&self) -> u32 {
-            self.manager.max_bet_ratio
-        }
-
-        #[ink(message)]
-        pub fn get_max_bet(&self) -> u128 {
-            (self.env().balance())
-                .checked_div(self.manager.max_bet_ratio as u128)
-                .unwrap()
-        }
     }
 }

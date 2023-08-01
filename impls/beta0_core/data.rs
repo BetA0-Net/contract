@@ -27,6 +27,14 @@ pub struct Manager {
     pub token_ratio: u32,
     pub bets: Mapping<AccountId, BetInformation>,
     pub admin_account: AccountId,
+    pub revenue_ratio: u32,
+    pub reward_pool: AccountId,
+    pub general_pool: AccountId,
+    pub bet_pool: AccountId,
+    pub min_over_number: u32,
+    pub max_over_number: u32,
+    pub min_under_number: u32,
+    pub max_under_number: u32,
     pub _reserved: Option<()>,
 }
 
@@ -40,6 +48,14 @@ impl Default for Manager {
             token_ratio: Default::default(),
             bets: Default::default(),
             admin_account: [0u8; 32].into(),
+            revenue_ratio: Default::default(),
+            reward_pool: [0u8; 32].into(),
+            general_pool: [0u8; 32].into(),
+            bet_pool: [0u8; 32].into(),
+            min_over_number: Default::default(),
+            max_over_number: Default::default(),
+            min_under_number: Default::default(),
+            max_under_number: Default::default(),
             _reserved: Default::default(),
         }
     }
