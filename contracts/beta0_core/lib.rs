@@ -3,7 +3,8 @@
 #[openbrush::implementation(Ownable, Pausable)]
 #[openbrush::contract]
 pub mod bet_a0 {
-    use bet_a0::traits::beta0_core::*;
+    use bet_a0::impls::beta0_core::{CoreImpl, *};
+    // use bet_a0::traits::beta0_core::*;
     use ink::prelude::vec::Vec;
     use ink::{
         codegen::{EmitEvent, Env},
@@ -13,7 +14,7 @@ pub mod bet_a0 {
         contracts::{
             ownable::{OwnableError, *},
             pausable::{PausableError, *},
-            psp22::PSP22Error,
+            psp22::{PSP22Error, *},
         },
         modifiers,
         traits::{DefaultEnv, Storage, String},
@@ -130,7 +131,10 @@ pub mod bet_a0 {
         bet_amount: Balance,
     }
 
+    impl CoreImpl for CoreContract {}
+
     impl BetA0Core for CoreContract {
+        //Execute function
         /// Play
         #[ink(message)]
         #[ink(payable)]
@@ -177,6 +181,14 @@ pub mod bet_a0 {
             });
 
             Ok(())
+        }
+
+        // Set function
+        /// setcode
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_code(&mut self, code_hash: [u8; 32]) -> Result<(), CoreError> {
+            CoreImpl::set_code(self, code_hash)
         }
     }
 
@@ -314,13 +326,13 @@ pub mod bet_a0 {
                 return Err(Error::Custom(String::from("P::Contract is paused")));
             }
 
-            let contract_balance = BetA0CoreRef::balance_of(
+            let contract_balance = PSP22Ref::balance_of(
                 &self.manager.bet_token_address,
                 <Self as DefaultEnv>::env().account_id(),
             );
 
             if contract_balance > 0 {
-                assert!(BetA0CoreRef::transfer(
+                assert!(PSP22Ref::transfer(
                     &self.manager.bet_token_address,
                     pool,
                     amount,
@@ -351,10 +363,10 @@ pub mod bet_a0 {
                 .unwrap();
 
             let pool_balance =
-                BetA0CoreRef::balance_of(&self.manager.bet_token_address, self.manager.bet_pool);
+                PSP22Ref::balance_of(&self.manager.bet_token_address, self.manager.bet_pool);
 
             // ensure the user gave allowance to the contract
-            if BetA0CoreRef::allowance(
+            if PSP22Ref::allowance(
                 &self.manager.bet_token_address,
                 self.manager.bet_pool,
                 <Self as DefaultEnv>::env().account_id(),
@@ -364,7 +376,7 @@ pub mod bet_a0 {
             }
 
             if pool_balance >= to_sent {
-                assert!(BetA0CoreRef::transfer_from(
+                assert!(PSP22Ref::transfer_from(
                     &self.manager.bet_token_address,
                     self.manager.bet_pool,
                     player,
@@ -373,7 +385,7 @@ pub mod bet_a0 {
                 )
                 .is_ok());
             } else if pool_balance > 0 {
-                assert!(BetA0CoreRef::transfer_from(
+                assert!(PSP22Ref::transfer_from(
                     &self.manager.bet_token_address,
                     self.manager.bet_pool,
                     player,
@@ -402,13 +414,13 @@ pub mod bet_a0 {
                 .checked_div(self.manager.token_ratio as u128)
                 .unwrap();
 
-            let contract_balance = BetA0CoreRef::balance_of(
+            let contract_balance = PSP22Ref::balance_of(
                 &self.manager.bet_token_address,
                 <Self as DefaultEnv>::env().account_id(),
             );
 
             if contract_balance >= to_sent {
-                assert!(BetA0CoreRef::transfer(
+                assert!(PSP22Ref::transfer(
                     &self.manager.bet_token_address,
                     player,
                     to_sent,
@@ -416,7 +428,7 @@ pub mod bet_a0 {
                 )
                 .is_ok());
             } else if contract_balance > 0 {
-                assert!(BetA0CoreRef::transfer(
+                assert!(PSP22Ref::transfer(
                     &self.manager.bet_token_address,
                     player,
                     contract_balance,
@@ -602,14 +614,14 @@ pub mod bet_a0 {
             }
 
             if value
-                > BetA0CoreRef::balance_of(
+                > PSP22Ref::balance_of(
                     &self.manager.bet_token_address,
                     <Self as DefaultEnv>::env().account_id(),
                 )
             {
                 return Err(Error::Custom(String::from("O::Not Enough Balance")));
             }
-            assert!(BetA0CoreRef::transfer(
+            assert!(PSP22Ref::transfer(
                 &self.manager.bet_token_address,
                 self.env().caller(),
                 value,
@@ -620,20 +632,6 @@ pub mod bet_a0 {
         }
 
         // SET FUNCTIONS
-        /// Set code_hash
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_code(&mut self, code_hash: [u8; 32]) -> Result<(), Error> {
-            ink::env::set_code_hash(&code_hash).unwrap_or_else(|err| {
-                panic!(
-                    "Failed to `set_code_hash` to {:?} due to {:?}",
-                    code_hash, err
-                )
-            });
-            ink::env::debug_println!("Switched code hash to {:?}.", code_hash);
-            Ok(())
-        }
-
         /// Set over_rates and discount rate - Only Owner 2 vectors same size
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -796,7 +794,7 @@ pub mod bet_a0 {
         /// get contract token balance
         #[ink(message)]
         pub fn get_token_balance(&self) -> Balance {
-            BetA0CoreRef::balance_of(
+            PSP22Ref::balance_of(
                 &self.manager.bet_token_address,
                 <Self as DefaultEnv>::env().account_id(),
             )
@@ -805,7 +803,7 @@ pub mod bet_a0 {
         /// get token balance pool
         #[ink(message)]
         pub fn get_token_balance_pool(&self, pool: AccountId) -> Balance {
-            BetA0CoreRef::balance_of(&self.manager.bet_token_address, pool)
+            PSP22Ref::balance_of(&self.manager.bet_token_address, pool)
         }
 
         /// Get token ratio
