@@ -2,7 +2,7 @@
 
 #[openbrush::implementation(Ownable, Pausable)]
 #[openbrush::contract]
-pub mod bet_a0 {
+pub mod beta0_core {
     use bet_a0::impls::beta0_core::{
         data::Manager, BetA0CoreTraitImpl, BetInformation, CoreError, *,
     };
@@ -62,8 +62,53 @@ pub mod bet_a0 {
         // Execute function
         /// Function changes state
         #[ink(message)]
-        fn change_state(&mut self) -> Result<(), PausableError>{
+        fn change_state(&mut self) -> Result<(), PausableError> {
             BetA0CoreTraitImpl::change_state(self)
+        }
+
+        /// tranfer token to pool
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn tranfer_token_to_pool(
+            &mut self,
+            pool: AccountId,
+            amount: Balance,
+        ) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::tranfer_token_to_pool(self, pool, amount)
+        }
+
+        /// reward token by bet pool
+        #[ink(message)]
+        fn reward_token_to_player(
+            &mut self,
+            player: AccountId,
+            bet_amount: Balance,
+        ) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::reward_token_to_player(self, player, bet_amount)
+        }
+
+        /// Function reward token
+        #[ink(message)]
+        fn reward_token(
+            &mut self,
+            player: AccountId,
+            bet_amount: Balance,
+        ) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::reward_token(self, player, bet_amount)
+        }
+
+        /// Withdraw Fees - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn withdraw_fee(&mut self, value: Balance) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::withdraw_fee(self, value)
+        }
+
+        /// Withdraw Token - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn withdraw_token(&mut self, value: Balance) -> Result<(), CoreError> {
+            BetA0CoreTraitImpl::withdraw_token(self, value)
         }
 
         // Set function
@@ -312,25 +357,6 @@ pub mod bet_a0 {
         }
 
         // EXECUTE FUNCTIONS
-        /// Function changes state
-        #[ink(message)]
-        pub fn change_state(&mut self) -> Result<(), PausableError> {
-            let caller = <Self as DefaultEnv>::env().caller();
-            if let Some(owner) = Ownable::owner(self) {
-                if caller != owner {
-                    return Err(From::from(PausableError::Paused));
-                }
-
-                if pausable::Internal::_paused(self) {
-                    pausable::Internal::_unpause(self)
-                } else {
-                    pausable::Internal::_pause(self)
-                }
-            } else {
-                return Err(From::from(PausableError::Paused));
-            }
-        }
-
         /// Function init
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -592,7 +618,8 @@ pub mod bet_a0 {
                     return Err(CoreError::Custom(String::from("O::Invalid Input")));
                 }
 
-                assert!(self.reward_token_to_player(player, bet_amount).is_ok());
+                // assert!(self.reward_token_to_player(player, bet_amount).is_ok());
+                assert!(BetA0CoreTrait::reward_token_to_player(self, player, bet_amount).is_ok());
 
                 // PSP22Ref::mint(&self.manager.psp22,player,bet_amount/(self.manager.token_ratio as u256));
                 Ok(())
@@ -600,181 +627,5 @@ pub mod bet_a0 {
                 return Err(CoreError::Custom(String::from("O::Bet Not Exist")));
             }
         }
-
-        /// tranfer token to pool
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn tranfer_token_to_pool(
-            &mut self,
-            pool: AccountId,
-            amount: Balance,
-        ) -> Result<(), CoreError> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(CoreError::Custom(String::from("P::Contract is paused")));
-            }
-
-            let contract_balance = PSP22Ref::balance_of(
-                &self.manager.bet_token_address,
-                <Self as DefaultEnv>::env().account_id(),
-            );
-
-            if contract_balance > 0 {
-                assert!(PSP22Ref::transfer(
-                    &self.manager.bet_token_address,
-                    pool,
-                    amount,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            } else {
-                return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
-            }
-
-            Ok(())
-        }
-
-        /// reward token by bet pool
-        #[ink(message)]
-        pub fn reward_token_to_player(
-            &mut self,
-            player: AccountId,
-            bet_amount: Balance,
-        ) -> Result<(), CoreError> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(CoreError::Custom(String::from("P::Contract is paused")));
-            }
-
-            let to_sent = bet_amount
-                .checked_div(self.manager.token_ratio as u128)
-                .unwrap();
-
-            let pool_balance =
-                PSP22Ref::balance_of(&self.manager.bet_token_address, self.manager.bet_pool);
-
-            // ensure the user gave allowance to the contract
-            if PSP22Ref::allowance(
-                &self.manager.bet_token_address,
-                self.manager.bet_pool,
-                <Self as DefaultEnv>::env().account_id(),
-            ) < to_sent
-            {
-                return Err(CoreError::Custom(String::from(
-                    "InsufficientAllowanceToLend",
-                )));
-            }
-
-            if pool_balance >= to_sent {
-                assert!(PSP22Ref::transfer_from(
-                    &self.manager.bet_token_address,
-                    self.manager.bet_pool,
-                    player,
-                    to_sent,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            } else if pool_balance > 0 {
-                assert!(PSP22Ref::transfer_from(
-                    &self.manager.bet_token_address,
-                    self.manager.bet_pool,
-                    player,
-                    to_sent,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            }
-            //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
-            Ok(())
-        }
-
-        /// Function reward token
-        #[ink(message)]
-        pub fn reward_token(
-            &mut self,
-            player: AccountId,
-            bet_amount: Balance,
-        ) -> Result<(), CoreError> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(CoreError::Custom(String::from("P::Contract is paused")));
-            }
-
-            let to_sent = bet_amount
-                .checked_div(self.manager.token_ratio as u128)
-                .unwrap();
-
-            let contract_balance = PSP22Ref::balance_of(
-                &self.manager.bet_token_address,
-                <Self as DefaultEnv>::env().account_id(),
-            );
-
-            if contract_balance >= to_sent {
-                assert!(PSP22Ref::transfer(
-                    &self.manager.bet_token_address,
-                    player,
-                    to_sent,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            } else if contract_balance > 0 {
-                assert!(PSP22Ref::transfer(
-                    &self.manager.bet_token_address,
-                    player,
-                    contract_balance,
-                    Vec::<u8>::new()
-                )
-                .is_ok());
-            }
-            //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
-            Ok(())
-        }
-
-        /// Withdraw Fees - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), CoreError> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(CoreError::Custom(String::from("P::Contract is paused")));
-            }
-
-            if value > self.env().balance() {
-                return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
-            }
-            assert!(self.env().transfer(self.env().caller(), value).is_ok());
-            Ok(())
-        }
-
-        /// Withdraw Fees - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn withdraw_token(&mut self, value: Balance) -> Result<(), CoreError> {
-            // state contract
-            if pausable::Internal::_paused(self) {
-                return Err(CoreError::Custom(String::from("P::Contract is paused")));
-            }
-
-            if value
-                > PSP22Ref::balance_of(
-                    &self.manager.bet_token_address,
-                    <Self as DefaultEnv>::env().account_id(),
-                )
-            {
-                return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
-            }
-            assert!(PSP22Ref::transfer(
-                &self.manager.bet_token_address,
-                self.env().caller(),
-                value,
-                Vec::<u8>::new()
-            )
-            .is_ok());
-            Ok(())
-        }
-
-        // SET FUNCTIONS
-
-        // GET FUNCTIONS
     }
 }

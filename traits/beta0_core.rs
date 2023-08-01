@@ -15,6 +15,33 @@ pub trait BetA0CoreTrait: Ownable + Pausable {
     #[ink(message)]
     fn change_state(&mut self) -> Result<(), PausableError>;
 
+    /// tranfer token to pool
+    #[ink(message)]
+    #[modifiers(only_owner)]
+    fn tranfer_token_to_pool(&mut self, pool: AccountId, amount: Balance) -> Result<(), CoreError>;
+
+    /// reward token by bet pool
+    #[ink(message)]
+    fn reward_token_to_player(
+        &mut self,
+        player: AccountId,
+        bet_amount: Balance,
+    ) -> Result<(), CoreError>;
+
+    /// Function reward token
+    #[ink(message)]
+    fn reward_token(&mut self, player: AccountId, bet_amount: Balance) -> Result<(), CoreError>;
+
+    /// Withdraw Fees - only Owner
+    #[ink(message)]
+    #[modifiers(only_owner)]
+    fn withdraw_fee(&mut self, value: Balance) -> Result<(), CoreError>;
+
+    /// Withdraw Token - only Owner
+    #[ink(message)]
+    #[modifiers(only_owner)]
+    fn withdraw_token(&mut self, value: Balance) -> Result<(), CoreError>;
+
     // Set function
     /// setcode
     #[ink(message)]

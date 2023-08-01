@@ -15,7 +15,13 @@ use openbrush::{
 // Storage<data::Manager>
 
 pub trait BetA0CoreTraitImpl:
-    Storage<Manager> + Storage<pausable::Data> + Storage<ownable::Data>
+    Storage<Manager>
+    + Storage<pausable::Data>
+    + Storage<ownable::Data>
+    + pausable::Internal
+    + ownable::Internal
+    + ownable::Ownable
+    + pausable::Pausable
 {
     // Execute function
     /// Function changes state
@@ -26,14 +32,172 @@ pub trait BetA0CoreTraitImpl:
                 return Err(From::from(PausableError::Paused));
             }
 
-            if pausable::Internal::_paused(self) {
-                pausable::Internal::_unpause(self)
+            if self._paused() {
+                self._unpause()
             } else {
-                pausable::Internal::_pause(self)
+                self._pause()
             }
         } else {
             return Err(From::from(PausableError::Paused));
         }
+    }
+
+    /// tranfer token to pool
+    fn tranfer_token_to_pool(&mut self, pool: AccountId, amount: Balance) -> Result<(), CoreError> {
+        // state contract
+        if pausable::Internal::_paused(self) {
+            return Err(CoreError::Custom(String::from("P::Contract is paused")));
+        }
+
+        let contract_balance = PSP22Ref::balance_of(
+            &self.data::<data::Manager>().bet_token_address,
+            Self::env().account_id(),
+        );
+
+        if contract_balance > 0 {
+            assert!(PSP22Ref::transfer(
+                &self.data::<data::Manager>().bet_token_address,
+                pool,
+                amount,
+                Vec::<u8>::new()
+            )
+            .is_ok());
+        } else {
+            return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
+        }
+
+        Ok(())
+    }
+
+    /// reward token by bet pool
+    fn reward_token_to_player(
+        &mut self,
+        player: AccountId,
+        bet_amount: Balance,
+    ) -> Result<(), CoreError> {
+        // state contract
+        if pausable::Internal::_paused(self) {
+            return Err(CoreError::Custom(String::from("P::Contract is paused")));
+        }
+
+        let data_manager = self.data::<data::Manager>();
+
+        let to_sent = bet_amount
+            .checked_div(data_manager.token_ratio as u128)
+            .unwrap();
+
+        let pool_balance =
+            PSP22Ref::balance_of(&data_manager.bet_token_address, data_manager.bet_pool);
+
+        // ensure the user gave allowance to the contract
+        if PSP22Ref::allowance(
+            &data_manager.bet_token_address,
+            data_manager.bet_pool,
+            Self::env().account_id(),
+        ) < to_sent
+        {
+            return Err(CoreError::Custom(String::from(
+                "InsufficientAllowanceToLend",
+            )));
+        }
+
+        if pool_balance >= to_sent {
+            assert!(PSP22Ref::transfer_from(
+                &data_manager.bet_token_address,
+                data_manager.bet_pool,
+                player,
+                to_sent,
+                Vec::<u8>::new()
+            )
+            .is_ok());
+        } else if pool_balance > 0 {
+            assert!(PSP22Ref::transfer_from(
+                &data_manager.bet_token_address,
+                data_manager.bet_pool,
+                player,
+                to_sent,
+                Vec::<u8>::new()
+            )
+            .is_ok());
+        }
+        //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
+        Ok(())
+    }
+
+    /// Function reward token
+    fn reward_token(&mut self, player: AccountId, bet_amount: Balance) -> Result<(), CoreError> {
+        // state contract
+        if pausable::Internal::_paused(self) {
+            return Err(CoreError::Custom(String::from("P::Contract is paused")));
+        }
+
+        let to_sent = bet_amount
+            .checked_div(self.data::<data::Manager>().token_ratio as u128)
+            .unwrap();
+
+        let contract_balance = PSP22Ref::balance_of(
+            &self.data::<data::Manager>().bet_token_address,
+            Self::env().account_id(),
+        );
+
+        if contract_balance >= to_sent {
+            assert!(PSP22Ref::transfer(
+                &self.data::<data::Manager>().bet_token_address,
+                player,
+                to_sent,
+                Vec::<u8>::new()
+            )
+            .is_ok());
+        } else if contract_balance > 0 {
+            assert!(PSP22Ref::transfer(
+                &self.data::<data::Manager>().bet_token_address,
+                player,
+                contract_balance,
+                Vec::<u8>::new()
+            )
+            .is_ok());
+        }
+        //PSP22Ref::mint(&mut self.manager.psp22,player,bet_amount/ (self.manager.token_ratio as u256));
+        Ok(())
+    }
+
+    /// Withdraw Fees - only Owner
+    fn withdraw_fee(&mut self, value: Balance) -> Result<(), CoreError> {
+        // state contract
+        if pausable::Internal::_paused(self) {
+            return Err(CoreError::Custom(String::from("P::Contract is paused")));
+        }
+
+        if value > Self::env().balance() {
+            return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
+        }
+        assert!(Self::env().transfer(Self::env().caller(), value).is_ok());
+        Ok(())
+    }
+
+    /// Withdraw Token - only Owner
+    fn withdraw_token(&mut self, value: Balance) -> Result<(), CoreError> {
+        // state contract
+        if pausable::Internal::_paused(self) {
+            return Err(CoreError::Custom(String::from("P::Contract is paused")));
+        }
+
+        if value
+            > PSP22Ref::balance_of(
+                &self.data::<data::Manager>().bet_token_address,
+                Self::env().account_id(),
+            )
+        {
+            return Err(CoreError::Custom(String::from("O::Not Enough Balance")));
+        }
+        assert!(PSP22Ref::transfer(
+            &self.data::<data::Manager>().bet_token_address,
+            Self::env().caller(),
+            value,
+            Vec::<u8>::new()
+        )
+        .is_ok());
+        Ok(())
     }
 
     // Set Function

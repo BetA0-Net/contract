@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x5224fe7a15f174d0c0650f8a984f2a0ad42bb908bcc0bf549061657790ef1e6e",
+    "hash": "0xdb9ec403db67d743f1062697dec568c9337b9c3075bc73147e50464031dc7cc3",
     "language": "ink! 4.2.1",
     "compiler": "rustc 1.70.0-nightly",
     "build_info": {
@@ -171,20 +171,20 @@
         "displayName": [
           "ChainExtension"
         ],
-        "type": 35
+        "type": 32
       },
       "hash": {
         "displayName": [
           "Hash"
         ],
-        "type": 33
+        "type": 30
       },
       "maxEventTopics": 4,
       "timestamp": {
         "displayName": [
           "Timestamp"
         ],
-        "type": 34
+        "type": 31
       }
     },
     "events": [
@@ -381,24 +381,6 @@
     },
     "messages": [
       {
-        "args": [],
-        "default": false,
-        "docs": [
-          " Function changes state"
-        ],
-        "label": "change_state",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 10
-        },
-        "selector": "0x300f90c8"
-      },
-      {
         "args": [
           {
             "label": "max_bet_ratio",
@@ -521,120 +503,46 @@
             "ink",
             "MessageResult"
           ],
-          "type": 13
+          "type": 10
         },
         "selector": "0xf2f6dba3"
       },
       {
         "args": [
           {
-            "label": "pool",
+            "label": "bet_number",
             "type": {
               "displayName": [
-                "AccountId"
+                "u32"
               ],
-              "type": 0
+              "type": 5
             }
           },
           {
-            "label": "amount",
+            "label": "is_over",
             "type": {
               "displayName": [
-                "Balance"
+                "u8"
               ],
-              "type": 6
+              "type": 2
             }
           }
         ],
         "default": false,
         "docs": [
-          " tranfer token to pool"
+          " Play"
         ],
-        "label": "tranfer_token_to_pool",
+        "label": "play",
         "mutates": true,
-        "payable": false,
+        "payable": true,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 13
+          "type": 17
         },
-        "selector": "0xccce8410"
-      },
-      {
-        "args": [
-          {
-            "label": "player",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          },
-          {
-            "label": "bet_amount",
-            "type": {
-              "displayName": [
-                "Balance"
-              ],
-              "type": 6
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " reward token by bet pool"
-        ],
-        "label": "reward_token_to_player",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xed12a862"
-      },
-      {
-        "args": [
-          {
-            "label": "player",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          },
-          {
-            "label": "bet_amount",
-            "type": {
-              "displayName": [
-                "Balance"
-              ],
-              "type": 6
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Function reward token"
-        ],
-        "label": "reward_token",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0x0b067d01"
+        "selector": "0x9963949f"
       },
       {
         "args": [
@@ -669,528 +577,17 @@
             "ink",
             "MessageResult"
           ],
-          "type": 13
+          "type": 10
         },
         "selector": "0x40656e2b"
-      },
-      {
-        "args": [
-          {
-            "label": "value",
-            "type": {
-              "displayName": [
-                "Balance"
-              ],
-              "type": 6
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Withdraw Fees - only Owner"
-        ],
-        "label": "withdraw_fee",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0x07fdb555"
-      },
-      {
-        "args": [
-          {
-            "label": "value",
-            "type": {
-              "displayName": [
-                "Balance"
-              ],
-              "type": 6
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Withdraw Fees - only Owner"
-        ],
-        "label": "withdraw_token",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0x3e7d451e"
-      },
-      {
-        "args": [
-          {
-            "label": "code_hash",
-            "type": {
-              "displayName": [],
-              "type": 1
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set code_hash"
-        ],
-        "label": "set_code",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0x694fb50f"
-      },
-      {
-        "args": [
-          {
-            "label": "over_rates",
-            "type": {
-              "displayName": [
-                "Vec"
-              ],
-              "type": 4
-            }
-          },
-          {
-            "label": "under_rates",
-            "type": {
-              "displayName": [
-                "Vec"
-              ],
-              "type": 4
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set over_rates and discount rate - Only Owner 2 vectors same size"
-        ],
-        "label": "set_rates",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xa2e1e480"
-      },
-      {
-        "args": [
-          {
-            "label": "bet_token_address",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set new psp22 address"
-        ],
-        "label": "set_bet_token_address",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xd0b1c221"
-      },
-      {
-        "args": [
-          {
-            "label": "token_ratio",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 5
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set new token ratio"
-        ],
-        "label": "set_token_ratio",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xcc3737a0"
-      },
-      {
-        "args": [
-          {
-            "label": "min_over_number",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 5
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set min number over roll"
-        ],
-        "label": "set_min_number_over_roll",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xcabc9a0a"
-      },
-      {
-        "args": [
-          {
-            "label": "max_over_number",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 5
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set max number over roll"
-        ],
-        "label": "set_max_number_over_roll",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0x06ba8809"
-      },
-      {
-        "args": [
-          {
-            "label": "min_under_number",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 5
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set min number under roll"
-        ],
-        "label": "set_min_number_under_roll",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0x4f43fce3"
-      },
-      {
-        "args": [
-          {
-            "label": "max_under_number",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 5
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set max number under roll"
-        ],
-        "label": "set_max_number_under_roll",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xeca83758"
-      },
-      {
-        "args": [
-          {
-            "label": "max_bet_ratio",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 5
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set max bet ratio"
-        ],
-        "label": "set_max_bet_ratio",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xe6494fb8"
-      },
-      {
-        "args": [
-          {
-            "label": "revenue_ratio",
-            "type": {
-              "displayName": [
-                "u32"
-              ],
-              "type": 5
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set revenue_ratio"
-        ],
-        "label": "set_revenue_ratio",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xaefb9395"
-      },
-      {
-        "args": [
-          {
-            "label": "reward_pool",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set reward_pool"
-        ],
-        "label": "set_reward_pool",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xc66cb381"
-      },
-      {
-        "args": [
-          {
-            "label": "general_pool",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set max bet ratio"
-        ],
-        "label": "set_general_pool",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xb751166a"
-      },
-      {
-        "args": [
-          {
-            "label": "bet_pool",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set bet_pool"
-        ],
-        "label": "set_bet_pool",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0xa2a7ddd7"
-      },
-      {
-        "args": [
-          {
-            "label": "admin_account",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Set admin id"
-        ],
-        "label": "set_admin_account",
-        "mutates": true,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 13
-        },
-        "selector": "0x93592525"
-      },
-      {
-        "args": [
-          {
-            "label": "player",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Is bet exist"
-        ],
-        "label": "is_bet_available",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 17
-        },
-        "selector": "0x2edfef78"
       },
       {
         "args": [],
         "default": false,
         "docs": [
-          " get admin id"
+          " get max number under roll"
         ],
-        "label": "get_admin_account",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 18
-        },
-        "selector": "0x48f0b6b6"
-      },
-      {
-        "args": [
-          {
-            "label": "player",
-            "type": {
-              "displayName": [
-                "AccountId"
-              ],
-              "type": 0
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Is bet exist"
-        ],
-        "label": "get_bet",
+        "label": "BetA0CoreTrait::get_max_number_under_roll",
         "mutates": false,
         "payable": false,
         "returnType": {
@@ -1200,15 +597,15 @@
           ],
           "type": 19
         },
-        "selector": "0x23629f3d"
+        "selector": "0x9f571242"
       },
       {
         "args": [],
         "default": false,
         "docs": [
-          " get min number over roll"
+          " Get token ratio"
         ],
-        "label": "get_min_number_over_roll",
+        "label": "BetA0CoreTrait::get_token_ratio",
         "mutates": false,
         "payable": false,
         "returnType": {
@@ -1216,63 +613,38 @@
             "ink",
             "MessageResult"
           ],
-          "type": 22
+          "type": 19
         },
-        "selector": "0x9e81bbf5"
+        "selector": "0x5bf4a937"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "max_over_number",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetMaxNumberOverRollInput1"
+              ],
+              "type": 5
+            }
+          }
+        ],
         "default": false,
         "docs": [
-          " get max number over roll"
+          " Set max number over roll"
         ],
-        "label": "get_max_number_over_roll",
-        "mutates": false,
+        "label": "BetA0CoreTrait::set_max_number_over_roll",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 22
+          "type": 10
         },
-        "selector": "0xf1e96d05"
-      },
-      {
-        "args": [],
-        "default": false,
-        "docs": [
-          " get min number under roll"
-        ],
-        "label": "get_min_number_under_roll",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 22
-        },
-        "selector": "0x05ddd7ea"
-      },
-      {
-        "args": [],
-        "default": false,
-        "docs": [
-          " get max number under roll"
-        ],
-        "label": "get_max_number_under_roll",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 22
-        },
-        "selector": "0x2dc33e24"
+        "selector": "0x9943f4b5"
       },
       {
         "args": [],
@@ -1280,7 +652,7 @@
         "docs": [
           " get contract token balance"
         ],
-        "label": "get_token_balance",
+        "label": "BetA0CoreTrait::get_token_balance",
         "mutates": false,
         "payable": false,
         "returnType": {
@@ -1288,9 +660,9 @@
             "ink",
             "MessageResult"
           ],
-          "type": 23
+          "type": 20
         },
-        "selector": "0xa4afc1d6"
+        "selector": "0x9ed23743"
       },
       {
         "args": [
@@ -1298,7 +670,8 @@
             "label": "pool",
             "type": {
               "displayName": [
-                "AccountId"
+                "beta0coretrait_external",
+                "GetTokenBalancePoolInput1"
               ],
               "type": 0
             }
@@ -1308,7 +681,7 @@
         "docs": [
           " get token balance pool"
         ],
-        "label": "get_token_balance_pool",
+        "label": "BetA0CoreTrait::get_token_balance_pool",
         "mutates": false,
         "payable": false,
         "returnType": {
@@ -1316,135 +689,164 @@
             "ink",
             "MessageResult"
           ],
-          "type": 23
+          "type": 20
         },
-        "selector": "0x281b142c"
+        "selector": "0x4fb01e84"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "value",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "WithdrawFeeInput1"
+              ],
+              "type": 6
+            }
+          }
+        ],
         "default": false,
         "docs": [
-          " Get token ratio"
+          " Withdraw Fees - only Owner"
         ],
-        "label": "get_token_ratio",
-        "mutates": false,
+        "label": "BetA0CoreTrait::withdraw_fee",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 22
+          "type": 10
         },
-        "selector": "0x0422842b"
+        "selector": "0xb1aed1dc"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "general_pool",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetGeneralPoolInput1"
+              ],
+              "type": 0
+            }
+          }
+        ],
         "default": false,
         "docs": [
-          " get revenue ratio"
+          " Set max bet ratio"
         ],
-        "label": "get_revenue_ratio",
-        "mutates": false,
+        "label": "BetA0CoreTrait::set_general_pool",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 22
+          "type": 10
         },
-        "selector": "0x1294559d"
+        "selector": "0x6a22225b"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "over_rates",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetRatesInput1"
+              ],
+              "type": 4
+            }
+          },
+          {
+            "label": "under_rates",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetRatesInput2"
+              ],
+              "type": 4
+            }
+          }
+        ],
         "default": false,
         "docs": [
-          " get reward pool"
+          " Set over_rates and discount rate - Only Owner 2 vectors same size"
         ],
-        "label": "get_reward_pool",
-        "mutates": false,
+        "label": "BetA0CoreTrait::set_rates",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 18
+          "type": 10
         },
-        "selector": "0x443c6a4a"
+        "selector": "0x62500603"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "min_over_number",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetMinNumberOverRollInput1"
+              ],
+              "type": 5
+            }
+          }
+        ],
         "default": false,
         "docs": [
-          " get general pool"
+          " Set min number over roll"
         ],
-        "label": "get_general_pool",
-        "mutates": false,
+        "label": "BetA0CoreTrait::set_min_number_over_roll",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 18
+          "type": 10
         },
-        "selector": "0xeaa0d34a"
+        "selector": "0x49094f28"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "min_under_number",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetMinNumberUnderRollInput1"
+              ],
+              "type": 5
+            }
+          }
+        ],
         "default": false,
         "docs": [
-          " get bet pool"
+          " Set min number under roll"
         ],
-        "label": "get_bet_pool",
-        "mutates": false,
+        "label": "BetA0CoreTrait::set_min_number_under_roll",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 18
+          "type": 10
         },
-        "selector": "0x7efe15f1"
-      },
-      {
-        "args": [],
-        "default": false,
-        "docs": [
-          " Get psp22 address"
-        ],
-        "label": "bet_token_address",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 18
-        },
-        "selector": "0x9846dd6f"
-      },
-      {
-        "args": [],
-        "default": false,
-        "docs": [
-          " Get Over Rates"
-        ],
-        "label": "get_over_rates",
-        "mutates": false,
-        "payable": false,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 24
-        },
-        "selector": "0xfe34dfce"
+        "selector": "0xfbed57ce"
       },
       {
         "args": [],
@@ -1452,7 +854,7 @@
         "docs": [
           " Get Under Rates"
         ],
-        "label": "get_under_rates",
+        "label": "BetA0CoreTrait::get_under_rates",
         "mutates": false,
         "payable": false,
         "returnType": {
@@ -1460,17 +862,28 @@
             "ink",
             "MessageResult"
           ],
-          "type": 24
+          "type": 21
         },
-        "selector": "0x47b1f246"
+        "selector": "0x657dfccb"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "player",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "IsBetAvailableInput1"
+              ],
+              "type": 0
+            }
+          }
+        ],
         "default": false,
         "docs": [
-          " Get Max Bet"
+          " Is bet exist"
         ],
-        "label": "get_max_bet_ratio",
+        "label": "BetA0CoreTrait::is_bet_available",
         "mutates": false,
         "payable": false,
         "returnType": {
@@ -1480,14 +893,16 @@
           ],
           "type": 22
         },
-        "selector": "0x8ac87b26"
+        "selector": "0xd36f536e"
       },
       {
         "args": [],
         "default": false,
-        "docs": [],
-        "label": "get_max_bet",
-        "mutates": false,
+        "docs": [
+          " Function changes state"
+        ],
+        "label": "BetA0CoreTrait::change_state",
+        "mutates": true,
         "payable": false,
         "returnType": {
           "displayName": [
@@ -1496,52 +911,15 @@
           ],
           "type": 23
         },
-        "selector": "0x48c1f572"
-      },
-      {
-        "args": [
-          {
-            "label": "bet_number",
-            "type": {
-              "displayName": [
-                "beta0core_external",
-                "PlayInput1"
-              ],
-              "type": 5
-            }
-          },
-          {
-            "label": "is_over",
-            "type": {
-              "displayName": [
-                "beta0core_external",
-                "PlayInput2"
-              ],
-              "type": 2
-            }
-          }
-        ],
-        "default": false,
-        "docs": [
-          " Play"
-        ],
-        "label": "BetA0Core::play",
-        "mutates": true,
-        "payable": true,
-        "returnType": {
-          "displayName": [
-            "ink",
-            "MessageResult"
-          ],
-          "type": 25
-        },
-        "selector": "0x4e7b81d5"
+        "selector": "0x305a2c7c"
       },
       {
         "args": [],
         "default": false,
-        "docs": [],
-        "label": "Ownable::owner",
+        "docs": [
+          " Get Max Bet"
+        ],
+        "label": "BetA0CoreTrait::get_max_bet_ratio",
         "mutates": false,
         "payable": false,
         "returnType": {
@@ -1549,9 +927,610 @@
             "ink",
             "MessageResult"
           ],
-          "type": 28
+          "type": 19
         },
-        "selector": "0x4fa43c8c"
+        "selector": "0xb18a8f89"
+      },
+      {
+        "args": [
+          {
+            "label": "pool",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "TranferTokenToPoolInput1"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "TranferTokenToPoolInput2"
+              ],
+              "type": 6
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " tranfer token to pool"
+        ],
+        "label": "BetA0CoreTrait::tranfer_token_to_pool",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0xd455769a"
+      },
+      {
+        "args": [
+          {
+            "label": "max_under_number",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetMaxNumberUnderRollInput1"
+              ],
+              "type": 5
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Set max number under roll"
+        ],
+        "label": "BetA0CoreTrait::set_max_number_under_roll",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0xe3879fee"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " get min number under roll"
+        ],
+        "label": "BetA0CoreTrait::get_min_number_under_roll",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 19
+        },
+        "selector": "0xa6185fcb"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " get max number over roll"
+        ],
+        "label": "BetA0CoreTrait::get_max_number_over_roll",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 19
+        },
+        "selector": "0x78687252"
+      },
+      {
+        "args": [
+          {
+            "label": "player",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "RewardTokenInput1"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "label": "bet_amount",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "RewardTokenInput2"
+              ],
+              "type": 6
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Function reward token"
+        ],
+        "label": "BetA0CoreTrait::reward_token",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0xfbd40ec8"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " get general pool"
+        ],
+        "label": "BetA0CoreTrait::get_general_pool",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 25
+        },
+        "selector": "0x1df721e9"
+      },
+      {
+        "args": [
+          {
+            "label": "bet_pool",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetBetPoolInput1"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Set bet_pool"
+        ],
+        "label": "BetA0CoreTrait::set_bet_pool",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0xe278565f"
+      },
+      {
+        "args": [
+          {
+            "label": "revenue_ratio",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetRevenueRatioInput1"
+              ],
+              "type": 5
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Set revenue_ratio"
+        ],
+        "label": "BetA0CoreTrait::set_revenue_ratio",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0xdcc98c25"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "BetA0CoreTrait::get_max_bet",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 20
+        },
+        "selector": "0x93aa56df"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " Get Over Rates"
+        ],
+        "label": "BetA0CoreTrait::get_over_rates",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 21
+        },
+        "selector": "0x0712d707"
+      },
+      {
+        "args": [
+          {
+            "label": "code_hash",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetCodeInput1"
+              ],
+              "type": 1
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " setcode"
+        ],
+        "label": "BetA0CoreTrait::set_code",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0x95d44c4a"
+      },
+      {
+        "args": [
+          {
+            "label": "bet_token_address",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetBetTokenAddressInput1"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Set new psp22 address"
+        ],
+        "label": "BetA0CoreTrait::set_bet_token_address",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0x7b887113"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " get min number over roll"
+        ],
+        "label": "BetA0CoreTrait::get_min_number_over_roll",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 19
+        },
+        "selector": "0xfc8a4a50"
+      },
+      {
+        "args": [
+          {
+            "label": "reward_pool",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetRewardPoolInput1"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Set reward_pool"
+        ],
+        "label": "BetA0CoreTrait::set_reward_pool",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0x8fccd75d"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " get revenue ratio"
+        ],
+        "label": "BetA0CoreTrait::get_revenue_ratio",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 19
+        },
+        "selector": "0x7e7317d4"
+      },
+      {
+        "args": [
+          {
+            "label": "token_ratio",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetTokenRatioInput1"
+              ],
+              "type": 5
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Set new token ratio"
+        ],
+        "label": "BetA0CoreTrait::set_token_ratio",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0x2979f379"
+      },
+      {
+        "args": [
+          {
+            "label": "player",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "RewardTokenToPlayerInput1"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "label": "bet_amount",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "RewardTokenToPlayerInput2"
+              ],
+              "type": 6
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " reward token by bet pool"
+        ],
+        "label": "BetA0CoreTrait::reward_token_to_player",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0xe7015c51"
+      },
+      {
+        "args": [
+          {
+            "label": "admin_account",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetAdminAccountInput1"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Set admin id"
+        ],
+        "label": "BetA0CoreTrait::set_admin_account",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0xd7ab667f"
+      },
+      {
+        "args": [
+          {
+            "label": "max_bet_ratio",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "SetMaxBetRatioInput1"
+              ],
+              "type": 5
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Set max bet ratio"
+        ],
+        "label": "BetA0CoreTrait::set_max_bet_ratio",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0x5bc9734b"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " get bet pool"
+        ],
+        "label": "BetA0CoreTrait::get_bet_pool",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 25
+        },
+        "selector": "0xf2945be3"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " Get psp22 address"
+        ],
+        "label": "BetA0CoreTrait::bet_token_address",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 25
+        },
+        "selector": "0x45b373ac"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [
+          " get reward pool"
+        ],
+        "label": "BetA0CoreTrait::get_reward_pool",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 25
+        },
+        "selector": "0x4284ecb5"
+      },
+      {
+        "args": [
+          {
+            "label": "value",
+            "type": {
+              "displayName": [
+                "beta0coretrait_external",
+                "WithdrawTokenInput1"
+              ],
+              "type": 6
+            }
+          }
+        ],
+        "default": false,
+        "docs": [
+          " Withdraw Token - only Owner"
+        ],
+        "label": "BetA0CoreTrait::withdraw_token",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 10
+        },
+        "selector": "0xbfb04963"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "Ownable::renounce_ownership",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 26
+        },
+        "selector": "0x5e228753"
       },
       {
         "args": [
@@ -1576,7 +1555,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 30
+          "type": 26
         },
         "selector": "0x11f43efd"
       },
@@ -1584,17 +1563,17 @@
         "args": [],
         "default": false,
         "docs": [],
-        "label": "Ownable::renounce_ownership",
-        "mutates": true,
+        "label": "Ownable::owner",
+        "mutates": false,
         "payable": false,
         "returnType": {
           "displayName": [
             "ink",
             "MessageResult"
           ],
-          "type": 30
+          "type": 28
         },
-        "selector": "0x5e228753"
+        "selector": "0x4fa43c8c"
       },
       {
         "args": [],
@@ -1608,7 +1587,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 17
+          "type": 22
         },
         "selector": "0xd123ce11"
       }
@@ -1745,7 +1724,7 @@
                                 {
                                   "layout": {
                                     "leaf": {
-                                      "key": "0xb045133d",
+                                      "key": "0xf5c3fa2a",
                                       "ty": 2
                                     }
                                   },
@@ -1754,7 +1733,7 @@
                                 {
                                   "layout": {
                                     "leaf": {
-                                      "key": "0xb045133d",
+                                      "key": "0xf5c3fa2a",
                                       "ty": 5
                                     }
                                   },
@@ -1763,7 +1742,7 @@
                                 {
                                   "layout": {
                                     "leaf": {
-                                      "key": "0xb045133d",
+                                      "key": "0xf5c3fa2a",
                                       "ty": 6
                                     }
                                   },
@@ -1773,7 +1752,7 @@
                               "name": "BetInformation"
                             }
                           },
-                          "root_key": "0xb045133d"
+                          "root_key": "0xf5c3fa2a"
                         }
                       },
                       "name": "bets"
@@ -1825,6 +1804,42 @@
                     },
                     {
                       "layout": {
+                        "leaf": {
+                          "key": "0x00000000",
+                          "ty": 5
+                        }
+                      },
+                      "name": "min_over_number"
+                    },
+                    {
+                      "layout": {
+                        "leaf": {
+                          "key": "0x00000000",
+                          "ty": 5
+                        }
+                      },
+                      "name": "max_over_number"
+                    },
+                    {
+                      "layout": {
+                        "leaf": {
+                          "key": "0x00000000",
+                          "ty": 5
+                        }
+                      },
+                      "name": "min_under_number"
+                    },
+                    {
+                      "layout": {
+                        "leaf": {
+                          "key": "0x00000000",
+                          "ty": 5
+                        }
+                      },
+                      "name": "max_under_number"
+                    },
+                    {
+                      "layout": {
                         "enum": {
                           "dispatchKey": "0x00000000",
                           "name": "Option",
@@ -1857,45 +1872,9 @@
                 }
               },
               "name": "manager"
-            },
-            {
-              "layout": {
-                "leaf": {
-                  "key": "0x00000000",
-                  "ty": 5
-                }
-              },
-              "name": "min_over_number"
-            },
-            {
-              "layout": {
-                "leaf": {
-                  "key": "0x00000000",
-                  "ty": 5
-                }
-              },
-              "name": "max_over_number"
-            },
-            {
-              "layout": {
-                "leaf": {
-                  "key": "0x00000000",
-                  "ty": 5
-                }
-              },
-              "name": "min_under_number"
-            },
-            {
-              "layout": {
-                "leaf": {
-                  "key": "0x00000000",
-                  "ty": 5
-                }
-              },
-              "name": "max_under_number"
             }
           ],
-          "name": "CoreContract"
+          "name": "BetA0CoreContract"
         }
       },
       "root_key": "0x00000000"
@@ -2135,6 +2114,125 @@
           "variant": {
             "variants": [
               {
+                "fields": [
+                  {
+                    "type": 13,
+                    "typeName": "String"
+                  }
+                ],
+                "index": 0,
+                "name": "Custom"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 14,
+                    "typeName": "PSP22Error"
+                  }
+                ],
+                "index": 1,
+                "name": "PSP22Error"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 15,
+                    "typeName": "PausableError"
+                  }
+                ],
+                "index": 2,
+                "name": "PausableError"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 16,
+                    "typeName": "OwnableError"
+                  }
+                ],
+                "index": 3,
+                "name": "OwnableError"
+              }
+            ]
+          }
+        },
+        "path": [
+          "bet_a0",
+          "traits",
+          "beta0_core",
+          "CoreError"
+        ]
+      }
+    },
+    {
+      "id": 13,
+      "type": {
+        "def": {
+          "primitive": "str"
+        }
+      }
+    },
+    {
+      "id": 14,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 13,
+                    "typeName": "String"
+                  }
+                ],
+                "index": 0,
+                "name": "Custom"
+              },
+              {
+                "index": 1,
+                "name": "InsufficientBalance"
+              },
+              {
+                "index": 2,
+                "name": "InsufficientAllowance"
+              },
+              {
+                "index": 3,
+                "name": "ZeroRecipientAddress"
+              },
+              {
+                "index": 4,
+                "name": "ZeroSenderAddress"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 13,
+                    "typeName": "String"
+                  }
+                ],
+                "index": 5,
+                "name": "SafeTransferCheckFailed"
+              }
+            ]
+          }
+        },
+        "path": [
+          "openbrush_contracts",
+          "traits",
+          "errors",
+          "psp22",
+          "PSP22Error"
+        ]
+      }
+    },
+    {
+      "id": 15,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
                 "index": 0,
                 "name": "Paused"
               },
@@ -2155,121 +2253,29 @@
       }
     },
     {
-      "id": 13,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 14
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 9
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 14
-          },
-          {
-            "name": "E",
-            "type": 9
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 14,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 7
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 15
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 7
-          },
-          {
-            "name": "E",
-            "type": 15
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 15,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 16,
-                    "typeName": "String"
-                  }
-                ],
-                "index": 0,
-                "name": "Custom"
-              }
-            ]
-          }
-        },
-        "path": [
-          "core_contract",
-          "bet_a0",
-          "Error"
-        ]
-      }
-    },
-    {
       "id": 16,
       "type": {
         "def": {
-          "primitive": "str"
-        }
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "CallerIsNotOwner"
+              },
+              {
+                "index": 1,
+                "name": "NewOwnerIsZero"
+              }
+            ]
+          }
+        },
+        "path": [
+          "openbrush_contracts",
+          "traits",
+          "errors",
+          "ownable",
+          "OwnableError"
+        ]
       }
     },
     {
@@ -2281,7 +2287,7 @@
               {
                 "fields": [
                   {
-                    "type": 3
+                    "type": 18
                   }
                 ],
                 "index": 0,
@@ -2302,7 +2308,7 @@
         "params": [
           {
             "name": "T",
-            "type": 3
+            "type": 18
           },
           {
             "name": "E",
@@ -2323,7 +2329,7 @@
               {
                 "fields": [
                   {
-                    "type": 0
+                    "type": 7
                   }
                 ],
                 "index": 0,
@@ -2332,7 +2338,7 @@
               {
                 "fields": [
                   {
-                    "type": 9
+                    "type": 14
                   }
                 ],
                 "index": 1,
@@ -2344,11 +2350,11 @@
         "params": [
           {
             "name": "T",
-            "type": 0
+            "type": 7
           },
           {
             "name": "E",
-            "type": 9
+            "type": 14
           }
         ],
         "path": [
@@ -2358,112 +2364,6 @@
     },
     {
       "id": 19,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 20
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 9
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 20
-          },
-          {
-            "name": "E",
-            "type": 9
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 20,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "index": 0,
-                "name": "None"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 21
-                  }
-                ],
-                "index": 1,
-                "name": "Some"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 21
-          }
-        ],
-        "path": [
-          "Option"
-        ]
-      }
-    },
-    {
-      "id": 21,
-      "type": {
-        "def": {
-          "composite": {
-            "fields": [
-              {
-                "name": "is_over",
-                "type": 2,
-                "typeName": "u8"
-              },
-              {
-                "name": "bet_number",
-                "type": 5,
-                "typeName": "u32"
-              },
-              {
-                "name": "bet_amount",
-                "type": 6,
-                "typeName": "Balance"
-              }
-            ]
-          }
-        },
-        "path": [
-          "core_contract",
-          "bet_a0",
-          "BetInformation"
-        ]
-      }
-    },
-    {
-      "id": 22,
       "type": {
         "def": {
           "variant": {
@@ -2505,7 +2405,7 @@
       }
     },
     {
-      "id": 23,
+      "id": 20,
       "type": {
         "def": {
           "variant": {
@@ -2547,7 +2447,7 @@
       }
     },
     {
-      "id": 24,
+      "id": 21,
       "type": {
         "def": {
           "variant": {
@@ -2589,7 +2489,7 @@
       }
     },
     {
-      "id": 25,
+      "id": 22,
       "type": {
         "def": {
           "variant": {
@@ -2597,7 +2497,7 @@
               {
                 "fields": [
                   {
-                    "type": 26
+                    "type": 3
                   }
                 ],
                 "index": 0,
@@ -2618,7 +2518,133 @@
         "params": [
           {
             "name": "T",
-            "type": 26
+            "type": 3
+          },
+          {
+            "name": "E",
+            "type": 9
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 23,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 24
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 9
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 24
+          },
+          {
+            "name": "E",
+            "type": 9
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 24,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 15
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 7
+          },
+          {
+            "name": "E",
+            "type": 15
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 25,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 0
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 9
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 0
           },
           {
             "name": "E",
@@ -2639,7 +2665,7 @@
               {
                 "fields": [
                   {
-                    "type": 7
+                    "type": 27
                   }
                 ],
                 "index": 0,
@@ -2648,7 +2674,7 @@
               {
                 "fields": [
                   {
-                    "type": 27
+                    "type": 9
                   }
                 ],
                 "index": 1,
@@ -2660,11 +2686,11 @@
         "params": [
           {
             "name": "T",
-            "type": 7
+            "type": 27
           },
           {
             "name": "E",
-            "type": 27
+            "type": 9
           }
         ],
         "path": [
@@ -2681,48 +2707,36 @@
               {
                 "fields": [
                   {
-                    "type": 16,
-                    "typeName": "String"
+                    "type": 7
                   }
                 ],
                 "index": 0,
-                "name": "Custom"
-              },
-              {
-                "index": 1,
-                "name": "InsufficientBalance"
-              },
-              {
-                "index": 2,
-                "name": "InsufficientAllowance"
-              },
-              {
-                "index": 3,
-                "name": "ZeroRecipientAddress"
-              },
-              {
-                "index": 4,
-                "name": "ZeroSenderAddress"
+                "name": "Ok"
               },
               {
                 "fields": [
                   {
-                    "type": 16,
-                    "typeName": "String"
+                    "type": 16
                   }
                 ],
-                "index": 5,
-                "name": "SafeTransferCheckFailed"
+                "index": 1,
+                "name": "Err"
               }
             ]
           }
         },
+        "params": [
+          {
+            "name": "T",
+            "type": 7
+          },
+          {
+            "name": "E",
+            "type": 16
+          }
+        ],
         "path": [
-          "openbrush_contracts",
-          "traits",
-          "errors",
-          "psp22",
-          "PSP22Error"
+          "Result"
         ]
       }
     },
@@ -2805,116 +2819,6 @@
       "id": 30,
       "type": {
         "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 31
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 9
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 31
-          },
-          {
-            "name": "E",
-            "type": 9
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 31,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "fields": [
-                  {
-                    "type": 7
-                  }
-                ],
-                "index": 0,
-                "name": "Ok"
-              },
-              {
-                "fields": [
-                  {
-                    "type": 32
-                  }
-                ],
-                "index": 1,
-                "name": "Err"
-              }
-            ]
-          }
-        },
-        "params": [
-          {
-            "name": "T",
-            "type": 7
-          },
-          {
-            "name": "E",
-            "type": 32
-          }
-        ],
-        "path": [
-          "Result"
-        ]
-      }
-    },
-    {
-      "id": 32,
-      "type": {
-        "def": {
-          "variant": {
-            "variants": [
-              {
-                "index": 0,
-                "name": "CallerIsNotOwner"
-              },
-              {
-                "index": 1,
-                "name": "NewOwnerIsZero"
-              }
-            ]
-          }
-        },
-        "path": [
-          "openbrush_contracts",
-          "traits",
-          "errors",
-          "ownable",
-          "OwnableError"
-        ]
-      }
-    },
-    {
-      "id": 33,
-      "type": {
-        "def": {
           "composite": {
             "fields": [
               {
@@ -2932,7 +2836,7 @@
       }
     },
     {
-      "id": 34,
+      "id": 31,
       "type": {
         "def": {
           "primitive": "u64"
@@ -2940,7 +2844,7 @@
       }
     },
     {
-      "id": 35,
+      "id": 32,
       "type": {
         "def": {
           "variant": {}
