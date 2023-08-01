@@ -5,6 +5,8 @@ use openbrush::{
     traits::{AccountId, Balance, String},
 };
 
+use crate::impls::beta0_core::BetInformation;
+
 #[openbrush::wrapper]
 pub type BetA0CoreRef = dyn PSP22 + BetA0CoreTrait;
 
@@ -175,6 +177,14 @@ pub trait BetA0CoreTrait: Ownable + Pausable {
     /// Is bet exist
     #[ink(message)]
     fn is_bet_available(&self, player: AccountId) -> bool;
+
+    /// get admin id
+    #[ink(message)]
+    fn get_admin_account(&self) -> AccountId;
+
+    /// get bet
+    #[ink(message)]
+    fn get_bet(&self, player: AccountId) -> Option<BetInformation>;
 }
 
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]

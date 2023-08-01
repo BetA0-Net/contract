@@ -371,4 +371,18 @@ pub trait BetA0CoreTraitImpl:
         let bet_info = self.data::<data::Manager>().bets.get(&player);
         bet_info.is_some()
     }
+
+    /// get admin id
+    fn get_admin_account(&self) -> AccountId {
+        self.data::<data::Manager>().admin_account
+    }
+
+    /// get bet
+    fn get_bet(&self, player: AccountId) -> Option<BetInformation> {
+        let bet_info = self.data::<data::Manager>().bets.get(&player);
+        if let Some(_unwrapped_bet_info) = bet_info {
+            return Some(bet_info.unwrap());
+        }
+        return None;
+    }
 }

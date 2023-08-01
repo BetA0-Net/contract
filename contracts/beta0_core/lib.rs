@@ -308,6 +308,18 @@ pub mod beta0_core {
         fn is_bet_available(&self, player: AccountId) -> bool {
             BetA0CoreTraitImpl::is_bet_available(self, player)
         }
+
+        /// get admin id
+        #[ink(message)]
+        fn get_admin_account(&self) -> AccountId {
+            BetA0CoreTraitImpl::get_admin_account(self)
+        }
+
+        /// get bet
+        #[ink(message)]
+        fn get_bet(&self, player: AccountId) -> Option<BetInformation> {
+            BetA0CoreTraitImpl::get_bet(self, player)
+        }
     }
 
     impl BetA0CoreContract {
