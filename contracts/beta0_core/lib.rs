@@ -1,6 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-#[openbrush::implementation(Ownable, Pausable)]
+#[openbrush::implementation(Ownable, Pausable, Upgradeable)]
 #[openbrush::contract]
 pub mod beta0_core {
     use bet_a0::impls::beta0_core::{
@@ -12,7 +12,7 @@ pub mod beta0_core {
         contracts::{
             ownable::{OwnableError, *},
             pausable::{PausableError, *},
-            psp22::{PSP22Error, *},
+            psp22::PSP22Error,
         },
         modifiers,
         traits::{DefaultEnv, Storage, String},
@@ -112,13 +112,6 @@ pub mod beta0_core {
         }
 
         // Set function
-        /// setcode
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        fn set_code(&mut self, code_hash: [u8; 32]) -> Result<(), CoreError> {
-            BetA0CoreTraitImpl::set_code(self, code_hash)
-        }
-
         /// Set min number over roll
         #[ink(message)]
         #[modifiers(only_owner)]

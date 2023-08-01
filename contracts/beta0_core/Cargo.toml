@@ -12,7 +12,7 @@ scale-info = { version = "2.6", default-features = false, features = ["derive"],
 
 # These dependencies
 bet_a0 = { path = "../..", default-features = false }
-openbrush = { branch="main", git = "https://github.com/727-Ventures/openbrush-contracts", default-features = false, features = ["psp22", "psp34", "ownable", "pausable", "access_control"] }
+openbrush = { branch="main", git = "https://github.com/727-Ventures/openbrush-contracts", default-features = false, features = ["psp22", "psp34", "ownable", "pausable", "access_control", "upgradeable"] }
 
 [lib]
 name = "core_contract"

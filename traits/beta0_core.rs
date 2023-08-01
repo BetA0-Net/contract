@@ -43,11 +43,6 @@ pub trait BetA0CoreTrait: Ownable + Pausable {
     fn withdraw_token(&mut self, value: Balance) -> Result<(), CoreError>;
 
     // Set function
-    /// setcode
-    #[ink(message)]
-    #[modifiers(only_owner)]
-    fn set_code(&mut self, code_hash: [u8; 32]) -> Result<(), CoreError>;
-
     /// Set min number over roll
     #[ink(message)]
     #[modifiers(only_owner)]
