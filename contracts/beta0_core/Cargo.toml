@@ -1,21 +1,18 @@
 [package]
-name = "core_contract"
+name = "beta0_core"
 version = "1.0.0"
 authors = ["bet_a0 <admin@betA0.net>"]
 edition = "2021"
 
 [dependencies]
 ink = { version = "4.2.1", default-features = false}
-
 scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
 scale-info = { version = "2.6", default-features = false, features = ["derive"], optional = true }
-
-# These dependencies
+openbrush = { tag = "4.0.0-beta", git = "https://github.com/Brushfam/openbrush-contracts", default-features = false, features = ["psp22", "upgradeable", "pausable", "ownable", "access_control"] }
 bet_a0 = { path = "../..", default-features = false }
-openbrush = { branch="main", git = "https://github.com/727-Ventures/openbrush-contracts", default-features = false, features = ["psp22", "psp34", "ownable", "pausable", "access_control", "upgradeable"] }
 
 [lib]
-name = "core_contract"
+name = "beta0_core"
 path = "lib.rs"
 
 
